@@ -1,0 +1,124 @@
+.dl {
+  background: var(--color-bg);
+  padding: 7rem 1.5rem;
+}
+
+.dl__container {
+  max-width: 30rem;
+  margin: 0 auto;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.dl--visible .dl__container {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dl__eyebrow {
+  margin: 0 0 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--color-text-secondary);
+}
+
+.dl__heading {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+.dl__description {
+  margin: 1rem 0 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.dl__cta {
+  margin-top: 2.25rem;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.6s ease 0.1s,
+    transform 0.6s ease 0.1s;
+}
+
+.dl--visible .dl__cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dl__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  padding: 0.8125rem 2rem;
+  border-radius: 0.625rem;
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.dl__button-icon {
+  flex-shrink: 0;
+}
+
+.dl__button:hover {
+  background: var(--color-accent-pressed);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px -8px rgba(91, 141, 239, 0.45);
+}
+
+.dl__button:active {
+  transform: translateY(0);
+}
+
+.dl__meta {
+  margin: 1.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity 0.6s ease 0.18s;
+}
+
+.dl--visible .dl__meta {
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .dl {
+    padding: 5rem 1.25rem;
+  }
+
+  .dl__button {
+    width: 100%;
+    text-align: center;
+    padding-top: 0.9375rem;
+    padding-bottom: 0.9375rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dl__container,
+  .dl__cta,
+  .dl__meta {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}
