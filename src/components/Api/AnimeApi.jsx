@@ -363,6 +363,55 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "oploverz",
+    title: "🟢 Oploverz",
+    items: [
+      {
+        method: "GET",
+        path: "/api/oploverz",
+        desc: "Info provider Oploverz.",
+      },
+      {
+        method: "GET",
+        path: "/api/oploverz/anime",
+        query: "?page=1",
+        desc: "Daftar anime.",
+      },
+      {
+        method: "GET",
+        path: "/api/oploverz/anime/search",
+        query: "?q=naruto&page=1",
+        desc: "Mencari anime berdasarkan kata kunci, termasuk poster.",
+      },
+      {
+        method: "GET",
+        path: "/api/oploverz/anime/latest",
+        desc: "Episode terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/oploverz/anime/:slug",
+        resolvedPath: "/api/oploverz/anime/naruto",
+        desc: "Detail anime.",
+        note: "Gunakan slug yang diperoleh dari endpoint list/search. Slug contoh dapat berubah mengikuti provider.",
+      },
+      {
+        method: "GET",
+        path: "/api/oploverz/episode/:slug",
+        resolvedPath: "/api/oploverz/episode/naruto-episode-1",
+        desc: "Detail episode.",
+        note: "Gunakan slug episode yang diperoleh dari data episode.",
+      },
+      {
+        method: "GET",
+        path: "/api/oploverz/episode/:slug/stream",
+        resolvedPath: "/api/oploverz/episode/naruto-episode-1/stream",
+        desc: "Data stream episode.",
+        note: "Gunakan slug episode yang diperoleh dari endpoint detail anime.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
