@@ -22,7 +22,7 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/providers/:provider",
-        resolvedPath: "/api/providers/samehadaku",
+        resolvedPath: "/api/providers/otakudesu",
         desc: "Detail dan capability provider.",
       },
       {
@@ -37,6 +37,7 @@ const endpointGroups = [
       },
     ],
   },
+
   {
     id: "samehadaku",
     title: "🎌 Samehadaku",
@@ -68,13 +69,14 @@ const endpointGroups = [
         path: "/api/samehadaku/anime/:slug",
         resolvedPath: "/api/samehadaku/anime/one-piece",
         desc: "Detail anime.",
-        note: "Bisa terkena Cloudflare Managed Challenge — scraper gagal dengan aman bila diblokir.",
+        note: "Gunakan slug yang diperoleh dari endpoint list/search. Slug contoh dapat berubah mengikuti provider.",
       },
       {
         method: "GET",
         path: "/api/samehadaku/episode/:slug",
         resolvedPath: "/api/samehadaku/episode/one-piece-episode-1-sub-indo",
         desc: "Detail episode.",
+        note: "Gunakan slug episode yang diperoleh dari data episode.",
       },
       {
         method: "GET",
@@ -82,6 +84,7 @@ const endpointGroups = [
         resolvedPath:
           "/api/samehadaku/episode/one-piece-episode-1-sub-indo/stream",
         desc: "Data stream dan mirror episode.",
+        note: "Gunakan slug episode yang diperoleh dari endpoint detail anime.",
       },
       {
         method: "GET",
@@ -91,6 +94,7 @@ const endpointGroups = [
       },
     ],
   },
+
   {
     id: "otakudesu",
     title: "🇯🇵 Otakudesu",
@@ -120,21 +124,24 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/otakudesu/anime/:slug",
-        resolvedPath: "/api/otakudesu/anime/one-piece-sub-indo",
+        resolvedPath: "/api/otakudesu/anime/mujikaku-seijo-nagasu-sub-indo",
         desc: "Detail anime beserta daftar episode.",
+        note: "Slug harus diambil dari hasil endpoint list atau search. Jangan menebak slug secara manual.",
       },
       {
         method: "GET",
         path: "/api/otakudesu/episode/:slug",
-        resolvedPath: "/api/otakudesu/episode/one-piece-episode-1-sub-indo",
+        resolvedPath: "/api/otakudesu/episode/mskmctn-episode-11-sub-indo",
         desc: "Detail episode, stream, dan mirror.",
+        note: "Slug episode harus diambil dari daftar episode pada detail anime.",
       },
       {
         method: "GET",
         path: "/api/otakudesu/episode/:slug/stream",
         resolvedPath:
-          "/api/otakudesu/episode/one-piece-episode-1-sub-indo/stream",
+          "/api/otakudesu/episode/mskmctn-episode-11-sub-indo/stream",
         desc: "Khusus data stream, mirror, dan download.",
+        note: "Endpoint ini menggunakan slug episode dari endpoint detail anime.",
       },
     ],
   },
