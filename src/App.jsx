@@ -51,7 +51,7 @@ export default function App() {
     return <TermsOfService />;
   }
 
-  if (path === "/api") {
+  if (path === "/anime") {
     return <AnimeApi />;
   }
 

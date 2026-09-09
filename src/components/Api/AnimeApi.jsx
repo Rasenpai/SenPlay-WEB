@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import "../../styles/AnimeApi.css";
+import "./AnimeApi.css";
 
 const baseUrl = "https://api.senplay.web.id";
 
@@ -12,11 +12,6 @@ const endpointGroups = [
         method: "GET",
         path: "/api/health",
         desc: "Cek status API.",
-      },
-      {
-        method: "GET",
-        path: "/api/health/cache",
-        desc: "Cek statistik cache.",
       },
     ],
   },
@@ -50,7 +45,7 @@ const endpointGroups = [
         method: "GET",
         path: "/api/samehadaku/anime/:slug",
         desc: "Detail anime.",
-        note: "Beberapa halaman detail bisa terkena Cloudflare Managed Challenge — endpoint tetap tersedia, scraper gagal dengan aman bila diblokir.",
+        note: "Bisa terkena Cloudflare Managed Challenge — scraper gagal dengan aman bila diblokir.",
       },
       {
         method: "GET",
@@ -103,7 +98,7 @@ function CheckIcon() {
   );
 }
 
-function EndpointRow({ item }) {
+function EndpointCard({ item }) {
   const [copied, setCopied] = useState(false);
   const fullPath = `${item.path}${item.query ?? ""}`;
 
@@ -118,13 +113,11 @@ function EndpointRow({ item }) {
   };
 
   return (
-    <li className="api__row">
-      <div className="api__row-main">
+    <li className="api__card">
+      <p className="api__card-title">{item.desc}</p>
+      <div className="api__card-endpoint">
         <span className="api__method">{item.method}</span>
-        <code className="api__path">
-          {item.path}
-          {item.query && <span className="api__query">{item.query}</span>}
-        </code>
+        <code className="api__path">{item.path}</code>
         <button
           type="button"
           className="api__copy"
@@ -134,8 +127,12 @@ function EndpointRow({ item }) {
           {copied ? <CheckIcon /> : <CopyIcon />}
         </button>
       </div>
-      <p className="api__row-desc">{item.desc}</p>
-      {item.note && <p className="api__row-note">{item.note}</p>}
+      {item.query && (
+        <p className="api__card-meta">
+          Query: <code>{item.query}</code>
+        </p>
+      )}
+      {item.note && <p className="api__card-note">{item.note}</p>}
     </li>
   );
 }
@@ -193,6 +190,34 @@ export default function AnimeApi() {
           dimulai dengan Samehadaku.
         </p>
 
+        <div className="api__warning">
+          <p className="api__warning-title">⚠️ PERINGATAN RATE LIMIT</p>
+          <p className="api__warning-line">
+            <strong>Rate Limit:</strong> 30 Request per menit
+          </p>
+          <p className="api__warning-line">
+            <strong>Pelanggaran:</strong> Jika Anda melewati batas, Anda akan
+            mendapatkan 3 kali peringatan sebelum <strong>BAN PERMANEN</strong>
+          </p>
+          <p className="api__warning-line">
+            ⚡ Gunakan API dengan bijak dan jangan spamming!
+          </p>
+          <p className="api__warning-line">
+            🛡️ <strong>Tujuan Rate Limit:</strong> Melindungi server dari
+            serangan Hama DDoS dan aktivitas spammer yang dapat mengganggu
+            layanan untuk pengguna lain.
+          </p>
+          <hr className="api__warning-divider" />
+          <p className="api__warning-line">
+            💼 <strong>Ingin Di Whitelist dari Rate Limit?</strong> Silahkan
+            Hubungi kami
+          </p>
+          <p className="api__warning-line">
+            🔓 <strong>Terkena Ban?</strong> Hubungi kami untuk unban{" "}
+            <strong>GRATIS</strong>
+          </p>
+        </div>
+
         <div className="api__base">
           <div className="api__base-label">Base URL</div>
           <div className="api__base-row">
@@ -212,23 +237,13 @@ export default function AnimeApi() {
         {endpointGroups.map((group) => (
           <div className="api__group" key={group.id}>
             <h3 className="api__group-title">{group.title}</h3>
-            <ul className="api__list">
+            <ul className="api__grid">
               {group.items.map((item) => (
-                <EndpointRow item={item} key={item.path} />
+                <EndpointCard item={item} key={item.path} />
               ))}
             </ul>
           </div>
         ))}
-
-        <div className="api__notice">
-          <p className="api__notice-text">
-            Endpoint episode berhasil mengambil data halaman episode secara
-            konsisten, termasuk player options dan download links. Untuk detail
-            anime, sebagian halaman Samehadaku dapat memicu Cloudflare Managed
-            Challenge; pada kondisi ini scraper gagal dengan aman alih-alih
-            memberi data yang salah.
-          </p>
-        </div>
       </div>
     </section>
   );
