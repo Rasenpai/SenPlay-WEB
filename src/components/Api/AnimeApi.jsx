@@ -112,9 +112,23 @@ const endpointGroups = [
       },
       {
         method: "GET",
+        path: "/api/otakudesu/anime/ongoing",
+        query: "?page=1",
+        desc: "Daftar anime yang sedang tayang.",
+      },
+      {
+        method: "GET",
+        path: "/api/otakudesu/anime/completed",
+        query: "?page=1",
+        desc: "Daftar anime yang sudah tamat.",
+        note: "Pagination tersedia di endpoint ini.",
+      },
+      {
+        method: "GET",
         path: "/api/otakudesu/anime/search",
         query: "?q=naruto&page=1",
         desc: "Mencari anime berdasarkan kata kunci.",
+        note: "Search Otakudesu saat ini tidak benar-benar melakukan pagination upstream (upstreamPaginated: false), jangan menganggap page=2 sebagai halaman berbeda.",
       },
       {
         method: "GET",
@@ -123,10 +137,29 @@ const endpointGroups = [
       },
       {
         method: "GET",
+        path: "/api/otakudesu/anime/genres",
+        desc: "Daftar genre yang tersedia.",
+      },
+      {
+        method: "GET",
+        path: "/api/otakudesu/anime/genre/:slug",
+        query: "?page=1",
+        resolvedPath: "/api/otakudesu/anime/genre/action",
+        desc: "Anime berdasarkan genre.",
+      },
+      {
+        method: "GET",
         path: "/api/otakudesu/anime/:slug",
         resolvedPath: "/api/otakudesu/anime/mujikaku-seijo-nagasu-sub-indo",
         desc: "Detail anime beserta daftar episode.",
         note: "Slug harus diambil dari hasil endpoint list atau search. Jangan menebak slug secara manual.",
+      },
+      {
+        method: "GET",
+        path: "/api/otakudesu/anime/:slug/batch",
+        resolvedPath: "/api/otakudesu/anime/1piece-sub-indo/batch",
+        desc: "Link batch download anime.",
+        note: "Tidak semua anime punya batch, jangan jadikan itu patokan error.",
       },
       {
         method: "GET",
@@ -142,6 +175,104 @@ const endpointGroups = [
           "/api/otakudesu/episode/mskmctn-episode-11-sub-indo/stream",
         desc: "Khusus data stream, mirror, dan download.",
         note: "Endpoint ini menggunakan slug episode dari endpoint detail anime.",
+      },
+    ],
+  },
+
+  {
+    id: "animasu",
+    title: "🟣 Animasu",
+    items: [
+      {
+        method: "GET",
+        path: "/api/animasu",
+        desc: "Info provider Animasu.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime",
+        query: "?page=1",
+        desc: "Daftar anime.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/search",
+        query: "?q=naruto&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/latest",
+        desc: "Anime episode terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/ongoing",
+        query: "?page=1",
+        desc: "Daftar anime yang sedang tayang.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/completed",
+        query: "?page=1",
+        desc: "Daftar anime yang sudah tamat.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/upcoming",
+        query: "?page=1",
+        desc: "Daftar anime yang akan tayang.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/movies",
+        query: "?page=1",
+        desc: "Daftar anime movie.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/genres",
+        desc: "Daftar genre yang tersedia.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/genre/:slug",
+        query: "?page=1",
+        resolvedPath: "/api/animasu/anime/genre/action",
+        desc: "Anime berdasarkan genre.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/donghua",
+        query: "?page=1",
+        desc: "Daftar donghua.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/anime/:slug",
+        resolvedPath: "/api/animasu/anime/mujikaku-seijo-nagasu-sub-indo",
+        desc: "Detail anime.",
+        note: "Slug sebaiknya diambil dari response list/search, jangan di-hardcode karena format slug upstream bisa berbeda.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/episode/:slug",
+        resolvedPath:
+          "/api/animasu/episode/mujikaku-seijo-wa-kyou-mo-muishiki-ni-chikara-wo-tare-nagasu-episode-11-sub-indo",
+        desc: "Detail episode.",
+        note: "Gunakan slug episode yang diperoleh dari response detail/list.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/episode/:slug/stream",
+        resolvedPath:
+          "/api/animasu/episode/mujikaku-seijo-wa-kyou-mo-muishiki-ni-chikara-wo-tare-nagasu-episode-11-sub-indo/stream",
+        desc: "Data stream dan mirror episode.",
+      },
+      {
+        method: "GET",
+        path: "/api/animasu/schedule",
+        desc: "Jadwal tayang mingguan.",
       },
     ],
   },
