@@ -6,24 +6,44 @@ const THEME_STORAGE_KEY = "senplay-api-theme";
 
 const endpointGroups = [
   {
-    id: "general",
-    title: "Umum",
+    id: "docs",
+    title: "📚 Dokumentasi API",
     items: [
       {
         method: "GET",
+        path: "/api",
+        desc: "Dokumentasi utama API.",
+      },
+      {
+        method: "GET",
+        path: "/api/providers",
+        desc: "Daftar semua provider.",
+      },
+      {
+        method: "GET",
+        path: "/api/providers/:provider",
+        desc: "Detail dan capability provider.",
+      },
+      {
+        method: "GET",
         path: "/api/health",
-        desc: "Cek status API.",
+        desc: "Cek kesehatan API.",
+      },
+      {
+        method: "GET",
+        path: "/api/health/cache",
+        desc: "Cek status dan cache.",
       },
     ],
   },
   {
     id: "samehadaku",
-    title: "Samehadaku",
+    title: "🎌 Samehadaku",
     items: [
       {
         method: "GET",
         path: "/api/samehadaku",
-        desc: "Info provider dan kapabilitasnya.",
+        desc: "Info provider Samehadaku.",
       },
       {
         method: "GET",
@@ -40,7 +60,7 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/samehadaku/anime/latest",
-        desc: "Episode anime terbaru.",
+        desc: "Anime episode terbaru.",
       },
       {
         method: "GET",
@@ -51,7 +71,12 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/samehadaku/episode/:slug",
-        desc: "Detail episode, termasuk player dan link download.",
+        desc: "Detail episode.",
+      },
+      {
+        method: "GET",
+        path: "/api/samehadaku/episode/:slug/stream",
+        desc: "Data stream dan mirror episode.",
       },
       {
         method: "GET",
@@ -61,6 +86,59 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "otakudesu",
+    title: "🇯🇵 Otakudesu",
+    items: [
+      {
+        method: "GET",
+        path: "/api/otakudesu",
+        desc: "Info provider Otakudesu.",
+      },
+      {
+        method: "GET",
+        path: "/api/otakudesu/anime",
+        query: "?page=1",
+        desc: "Daftar anime ongoing.",
+      },
+      {
+        method: "GET",
+        path: "/api/otakudesu/anime/search",
+        query: "?q=naruto&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+      },
+      {
+        method: "GET",
+        path: "/api/otakudesu/anime/latest",
+        desc: "Episode terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/otakudesu/anime/:slug",
+        desc: "Detail anime beserta daftar episode.",
+      },
+      {
+        method: "GET",
+        path: "/api/otakudesu/episode/:slug",
+        desc: "Detail episode, stream, dan mirror.",
+      },
+      {
+        method: "GET",
+        path: "/api/otakudesu/episode/:slug/stream",
+        desc: "Khusus data stream, mirror, dan download.",
+      },
+    ],
+  },
+];
+
+const totalEndpoints = endpointGroups.reduce(
+  (sum, group) => sum + group.items.length,
+  0,
+);
+
+const baseUrlExamples = [
+  "/api/otakudesu/anime?page=1",
+  "/api/otakudesu/episode/mskmctn-episode-11-sub-indo/stream",
 ];
 
 function CopyIcon() {
@@ -192,6 +270,35 @@ function EndpointCard({ item }) {
   );
 }
 
+function BaseUrlExample({ path }) {
+  const [copied, setCopied] = useState(false);
+  const fullUrl = `${baseUrl}${path}`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(fullUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard not available; ignore silently.
+    }
+  };
+
+  return (
+    <li className="api__base-example">
+      <code className="api__base-example-url">{fullUrl}</code>
+      <button
+        type="button"
+        className="api__copy"
+        onClick={handleCopy}
+        aria-label={`Salin contoh URL ${fullUrl}`}
+      >
+        {copied ? <CheckIcon /> : <CopyIcon />}
+      </button>
+    </li>
+  );
+}
+
 export default function AnimeApi() {
   const sectionRef = useRef(null);
   const [visible, setVisible] = useState(
@@ -266,7 +373,7 @@ export default function AnimeApi() {
         </h2>
         <p className="api__description">
           REST API yang menyuplai data anime SenPlay dari beberapa provider,
-          dimulai dengan Samehadaku.
+          dimulai dengan Samehadaku dan Otakudesu.
         </p>
 
         <div className="api__warning">
@@ -298,7 +405,7 @@ export default function AnimeApi() {
         </div>
 
         <div className="api__base">
-          <div className="api__base-label">Base URL</div>
+          <div className="api__base-label">🌐 Base URL Production</div>
           <div className="api__base-row">
             <code className="api__base-url">{baseUrl}</code>
             <button
@@ -311,6 +418,12 @@ export default function AnimeApi() {
               <span>{baseCopied ? "Tersalin" : "Salin"}</span>
             </button>
           </div>
+          <p className="api__base-hint">Contoh:</p>
+          <ul className="api__base-examples">
+            {baseUrlExamples.map((path) => (
+              <BaseUrlExample path={path} key={path} />
+            ))}
+          </ul>
         </div>
 
         {endpointGroups.map((group) => (
@@ -323,6 +436,11 @@ export default function AnimeApi() {
             </ul>
           </div>
         ))}
+
+        <p className="api__total">
+          Total {totalEndpoints} endpoint yang sudah kita definisikan, termasuk
+          endpoint dokumentasi dan health.
+        </p>
       </div>
     </section>
   );
