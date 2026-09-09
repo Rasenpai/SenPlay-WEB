@@ -3,7 +3,7 @@ import "./DownloadSection.css";
 
 // Replace with the actual SenPlay APK download URL.
 const downloadUrl =
-  "https://expo.dev/artifacts/eas/PhkYGdbIiiUiRr7s6Ttq4PFagEJiWyx3gnS7YI9Xn3M.apk";
+  "https://expo.dev/artifacts/eas/c3IVlhFBtveQkmLpWzSIb35_aNOHpY-K-_QfWTF8hLU.apk";
 
 function AndroidIcon() {
   return (
