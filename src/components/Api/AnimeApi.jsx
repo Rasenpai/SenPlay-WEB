@@ -257,7 +257,7 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/animasu/episode/:slug",
-        resolvedPath: "nonton-raised-by-demons-panda-li-episode-1",
+        resolvedPath: "/api/anime/episode/nonton-raised-by-demons-panda-li-episode-1",
         desc: "Detail episode.",
         note: "Gunakan slug episode yang diperoleh dari response detail/list.",
       },
