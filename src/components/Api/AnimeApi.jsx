@@ -250,15 +250,14 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/animasu/anime/:slug",
-        resolvedPath: "/api/animasu/anime/mujikaku-seijo-nagasu-sub-indo",
+        resolvedPath: "/api/animasu/anime/raised-by-demons-panda-li",
         desc: "Detail anime.",
         note: "Slug sebaiknya diambil dari response list/search, jangan di-hardcode karena format slug upstream bisa berbeda.",
       },
       {
         method: "GET",
         path: "/api/animasu/episode/:slug",
-        resolvedPath:
-          "/api/animasu/episode/mujikaku-seijo-wa-kyou-mo-muishiki-ni-chikara-wo-tare-nagasu-episode-11-sub-indo",
+        resolvedPath: "nonton-raised-by-demons-panda-li-episode-1",
         desc: "Detail episode.",
         note: "Gunakan slug episode yang diperoleh dari response detail/list.",
       },
@@ -266,7 +265,7 @@ const endpointGroups = [
         method: "GET",
         path: "/api/animasu/episode/:slug/stream",
         resolvedPath:
-          "/api/animasu/episode/mujikaku-seijo-wa-kyou-mo-muishiki-ni-chikara-wo-tare-nagasu-episode-11-sub-indo/stream",
+          "/api/animasu/episode/nonton-raised-by-demons-panda-li-episode-1/stream",
         desc: "Data stream dan mirror episode.",
       },
       {
