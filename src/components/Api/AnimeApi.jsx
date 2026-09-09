@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import "./AnimeApi.css";
+import "../../styles/AnimeApi.css";
 
 const baseUrl = "https://api.senplay.web.id";
 
