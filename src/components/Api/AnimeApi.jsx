@@ -590,36 +590,46 @@ function BaseUrlExample({ path }) {
 
 export default function AnimeApi() {
   const sectionRef = useRef(null);
-  const [visible, setVisible] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  );
+
+  // FIX: default ke true. Sebelumnya default-nya bergantung pada
+  // prefers-reduced-motion + IntersectionObserver, dan kalau observer-nya
+  // gagal trigger (mis. section sudah full-height saat mount pertama),
+  // `visible` tidak akan pernah jadi true -> .api__container permanen
+  // opacity: 0 di CSS -> halaman terlihat blank walau semua elemen ada.
+  const [visible, setVisible] = useState(true);
+
   const [baseCopied, setBaseCopied] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "dark";
-    return window.localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+    try {
+      return window.localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+    } catch {
+      // localStorage bisa saja diblokir (private mode / storage penuh).
+      return "dark";
+    }
   });
 
+  // Animasi fade-in tetap dipertahankan sebagai progressive enhancement:
+  // konten sudah default visible, observer ini cuma dipakai kalau nanti
+  // mau bikin efek "muncul saat di-scroll ke section lain" — sekarang
+  // tidak dipakai untuk menyembunyikan konten di awal.
   useEffect(() => {
     const node = sectionRef.current;
-    if (!node || visible) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [visible]);
+    if (!node) return;
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
+      return;
+    }
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+  }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      // Abaikan kalau localStorage tidak bisa ditulis.
+    }
   }, [theme]);
 
   const handleCopyBase = async () => {
