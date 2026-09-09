@@ -238,7 +238,7 @@ const endpointGroups = [
         method: "GET",
         path: "/api/animasu/anime/genre/:slug",
         query: "?page=1",
-        resolvedPath: "/api/animasu/anime/genre/action",
+        resolvedPath: "/api/animasu/anime/genre/aksi",
         desc: "Anime berdasarkan genre.",
       },
       {
@@ -257,7 +257,8 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/animasu/episode/:slug",
-        resolvedPath: "/api/anime/episode/nonton-raised-by-demons-panda-li-episode-1",
+        resolvedPath:
+          "/api/animasu/episode/nonton-raised-by-demons-panda-li-episode-1",
         desc: "Detail episode.",
         note: "Gunakan slug episode yang diperoleh dari response detail/list.",
       },
@@ -272,6 +273,93 @@ const endpointGroups = [
         method: "GET",
         path: "/api/animasu/schedule",
         desc: "Jadwal tayang mingguan.",
+      },
+    ],
+  },
+
+  {
+    id: "kusonime",
+    title: "🟠 Kusonime",
+    items: [
+      {
+        method: "GET",
+        path: "/api/kusonime",
+        desc: "Info provider Kusonime.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime",
+        query: "?page=1",
+        desc: "Daftar anime.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/latest",
+        query: "?page=1",
+        desc: "Anime episode terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/genres",
+        desc: "Daftar genre yang tersedia.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/genre/:slug",
+        query: "?page=1",
+        resolvedPath: "/api/kusonime/anime/genre/action",
+        desc: "Anime berdasarkan genre.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/season/:slug",
+        query: "?page=1",
+        resolvedPath: "/api/kusonime/anime/season/spring-2026",
+        desc: "Anime berdasarkan musim rilis.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/:slug",
+        resolvedPath:
+          "/api/kusonime/anime/jikuu-bouken-nuumamonjaa-subtitle-indonesia",
+        desc: "Detail anime.",
+        note: "Slug sebaiknya diambil dari response list/search, jangan di-hardcode karena format slug upstream bisa berbeda.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/bd",
+        query: "?page=1",
+        desc: "Daftar rilisan BD.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/movies",
+        query: "?page=1",
+        desc: "Daftar anime movie.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/ova",
+        query: "?page=1",
+        desc: "Daftar anime OVA.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/ona",
+        query: "?page=1",
+        desc: "Daftar anime ONA.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/special",
+        query: "?page=1",
+        desc: "Daftar anime special.",
+      },
+      {
+        method: "GET",
+        path: "/api/kusonime/anime/live-action",
+        query: "?page=1",
+        desc: "Daftar live-action.",
       },
     ],
   },
