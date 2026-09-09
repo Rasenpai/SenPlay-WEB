@@ -7,16 +7,34 @@
     color 0.2s ease;
 }
 
-/* Light theme overrides — scoped to this section only */
+/* Light theme overrides — scoped to this section only.
+   Softened from pure white so it doesn't blow out next to the rest of the UI. */
 .api[data-theme="light"] {
-  --color-bg: #f5f6fa;
-  --color-text-primary: #14161c;
-  --color-text-secondary: #4b4f5b;
-  --color-text-muted: #7a7f8c;
+  --color-bg: #eef0f4;
+  --color-text-primary: #181a20;
+  --color-text-secondary: #565b68;
+  --color-text-muted: #7d8290;
   --color-border: rgba(15, 17, 23, 0.1);
   --color-surface: rgba(15, 17, 23, 0.03);
-  --color-surface-hover: rgba(15, 17, 23, 0.06);
+  --color-surface-hover: rgba(15, 17, 23, 0.055);
+  --color-card-bg: rgba(15, 17, 23, 0.045);
+  --color-group-bg: rgba(15, 17, 23, 0.025);
   --color-danger-surface: rgba(217, 48, 54, 0.08);
+}
+
+/* Dark theme overrides — scoped to this section only.
+   Lifted off pure-black so it sits closer in weight to the rest of the UI. */
+.api[data-theme="dark"] {
+  --color-bg: #131a27;
+  --color-text-primary: #eef1f7;
+  --color-text-secondary: #9aa3b5;
+  --color-text-muted: #6f7889;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-surface: rgba(255, 255, 255, 0.03);
+  --color-surface-hover: rgba(255, 255, 255, 0.06);
+  --color-card-bg: rgba(255, 255, 255, 0.05);
+  --color-group-bg: rgba(255, 255, 255, 0.025);
+  --color-danger-surface: rgba(229, 72, 77, 0.1);
 }
 
 .api__theme-toggle {
@@ -191,14 +209,24 @@
   margin-left: auto;
 }
 
-/* Endpoint groups */
+/* Endpoint groups — each provider gets its own tinted panel so groups read
+   as separate sections instead of blending into the page background. */
 
 .api__group {
   margin-top: 3rem;
+  padding: 1.75rem 1.5rem 2rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+  background: var(
+    --color-group-bg,
+    var(--color-surface, rgba(255, 255, 255, 0.02))
+  );
 }
 
 .api__group-title {
   margin: 0 0 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
   font-size: 1.0625rem;
   font-weight: 600;
   color: var(--color-text-primary);
@@ -218,7 +246,10 @@
   border-radius: 0.75rem;
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
   border-left: 3px solid var(--color-accent);
-  background: var(--color-surface, rgba(255, 255, 255, 0.02));
+  background: var(
+    --color-card-bg,
+    var(--color-surface, rgba(255, 255, 255, 0.02))
+  );
   cursor: pointer;
   transition:
     border-color 0.2s ease,
@@ -332,6 +363,10 @@
   .api__theme-toggle {
     top: 1.25rem;
     right: 1.25rem;
+  }
+
+  .api__group {
+    padding: 1.25rem 1rem 1.5rem;
   }
 
   .api__grid {
