@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "../../styles/AnimeApi.css";
 
 const baseUrl = "https://api.senplay.web.id";
+const THEME_STORAGE_KEY = "senplay-api-theme";
 
 const endpointGroups = [
   {
@@ -98,13 +99,49 @@ function CheckIcon() {
   );
 }
 
+function SunIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-13a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1zm0 16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1zM4.22 5.64a1 1 0 0 1 1.42 0l.7.71a1 1 0 1 1-1.41 1.41l-.71-.7a1 1 0 0 1 0-1.42zm14.44 14.44a1 1 0 0 1-1.42 0l-.7-.71a1 1 0 1 1 1.41-1.41l.71.7a1 1 0 0 1 0 1.42zM3 12a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1zm16 0a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2h-1a1 1 0 0 1-1-1zM4.22 18.36a1 1 0 0 1 0-1.42l.7-.7a1 1 0 1 1 1.41 1.41l-.7.71a1 1 0 0 1-1.41 0zM18.36 4.22a1 1 0 0 1 1.42 0 1 1 0 0 1 0 1.42l-.71.7a1 1 0 1 1-1.41-1.41z"
+      />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M20.742 13.045a8.088 8.088 0 0 1-2.077.267c-4.476 0-8.106-3.63-8.106-8.106 0-1.176.25-2.293.702-3.302a.75.75 0 0 0-.919-1.02A10.096 10.096 0 0 0 2.5 10.75c0 5.66 4.59 10.25 10.25 10.25a10.096 10.096 0 0 0 9.866-7.842.75.75 0 0 0-1.014-.855 8.052 8.052 0 0 1-.86.742z"
+      />
+    </svg>
+  );
+}
+
 function EndpointCard({ item }) {
   const [copied, setCopied] = useState(false);
   const fullPath = `${item.path}${item.query ?? ""}`;
+  const fullUrl = `${baseUrl}${fullPath}`;
 
-  const handleCopy = async () => {
+  const handleCopy = async (e) => {
+    e.stopPropagation();
     try {
-      await navigator.clipboard.writeText(`${baseUrl}${fullPath}`);
+      await navigator.clipboard.writeText(fullUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -112,8 +149,26 @@ function EndpointCard({ item }) {
     }
   };
 
+  const openEndpoint = () => {
+    window.open(fullUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openEndpoint();
+    }
+  };
+
   return (
-    <li className="api__card">
+    <li
+      className="api__card"
+      role="button"
+      tabIndex={0}
+      onClick={openEndpoint}
+      onKeyDown={handleKeyDown}
+      aria-label={`Buka ${fullPath} di tab baru`}
+    >
       <p className="api__card-title">{item.desc}</p>
       <div className="api__card-endpoint">
         <span className="api__method">{item.method}</span>
@@ -145,6 +200,10 @@ export default function AnimeApi() {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   const [baseCopied, setBaseCopied] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "dark";
+    return window.localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+  });
 
   useEffect(() => {
     const node = sectionRef.current;
@@ -163,6 +222,10 @@ export default function AnimeApi() {
     return () => observer.disconnect();
   }, [visible]);
 
+  useEffect(() => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
   const handleCopyBase = async () => {
     try {
       await navigator.clipboard.writeText(baseUrl);
@@ -173,13 +236,29 @@ export default function AnimeApi() {
     }
   };
 
+  const toggleTheme = () => {
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  };
+
   return (
     <section
       id="anime-api"
       ref={sectionRef}
+      data-theme={theme}
       className={`api${visible ? " api--visible" : ""}`}
       aria-labelledby="anime-api-heading"
     >
+      <button
+        type="button"
+        className="api__theme-toggle"
+        onClick={toggleTheme}
+        aria-label={
+          theme === "dark" ? "Ganti ke tema terang" : "Ganti ke tema gelap"
+        }
+      >
+        {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+      </button>
+
       <div className="api__container">
         <p className="api__eyebrow">DOKUMENTASI API</p>
         <h2 id="anime-api-heading" className="api__heading">
