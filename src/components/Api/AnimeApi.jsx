@@ -22,6 +22,7 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/providers/:provider",
+        resolvedPath: "/api/providers/samehadaku",
         desc: "Detail dan capability provider.",
       },
       {
@@ -65,17 +66,21 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/samehadaku/anime/:slug",
+        resolvedPath: "/api/samehadaku/anime/one-piece",
         desc: "Detail anime.",
         note: "Bisa terkena Cloudflare Managed Challenge — scraper gagal dengan aman bila diblokir.",
       },
       {
         method: "GET",
         path: "/api/samehadaku/episode/:slug",
+        resolvedPath: "/api/samehadaku/episode/one-piece-episode-1-sub-indo",
         desc: "Detail episode.",
       },
       {
         method: "GET",
         path: "/api/samehadaku/episode/:slug/stream",
+        resolvedPath:
+          "/api/samehadaku/episode/one-piece-episode-1-sub-indo/stream",
         desc: "Data stream dan mirror episode.",
       },
       {
@@ -115,16 +120,20 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/otakudesu/anime/:slug",
+        resolvedPath: "/api/otakudesu/anime/one-piece-sub-indo",
         desc: "Detail anime beserta daftar episode.",
       },
       {
         method: "GET",
         path: "/api/otakudesu/episode/:slug",
+        resolvedPath: "/api/otakudesu/episode/one-piece-episode-1-sub-indo",
         desc: "Detail episode, stream, dan mirror.",
       },
       {
         method: "GET",
         path: "/api/otakudesu/episode/:slug/stream",
+        resolvedPath:
+          "/api/otakudesu/episode/one-piece-episode-1-sub-indo/stream",
         desc: "Khusus data stream, mirror, dan download.",
       },
     ],
@@ -213,7 +222,8 @@ function MoonIcon() {
 
 function EndpointCard({ item }) {
   const [copied, setCopied] = useState(false);
-  const fullPath = `${item.path}${item.query ?? ""}`;
+  const requestPath = item.resolvedPath ?? item.path;
+  const fullPath = `${requestPath}${item.query ?? ""}`;
   const fullUrl = `${baseUrl}${fullPath}`;
 
   const handleCopy = async (e) => {
@@ -263,6 +273,11 @@ function EndpointCard({ item }) {
       {item.query && (
         <p className="api__card-meta">
           Query: <code>{item.query}</code>
+        </p>
+      )}
+      {item.resolvedPath && (
+        <p className="api__card-meta">
+          Contoh: <code>{item.resolvedPath}</code>
         </p>
       )}
       {item.note && <p className="api__card-note">{item.note}</p>}
