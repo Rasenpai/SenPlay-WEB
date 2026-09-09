@@ -7,6 +7,7 @@ import DownloadSection from "./components/DownloadSection";
 import FAQ from "./components/FAQ";
 import Footer from "./components/Footer";
 import TermsOfService from "./components/TermsOfService";
+import AnimeApi from "./components/Api/AnimeApi";
 import SEO from "./components/SEO";
 import {
   DEFAULT_TITLE,
@@ -48,6 +49,10 @@ export default function App() {
 
   if (path === "/terms") {
     return <TermsOfService />;
+  }
+
+  if (path === "/api") {
+    return <AnimeApi />;
   }
 
   return (

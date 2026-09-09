@@ -1,0 +1,225 @@
+.api {
+  background: var(--color-bg);
+  padding: 7rem 1.5rem;
+}
+
+.api__container {
+  max-width: 42rem;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.api--visible .api__container {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.api__eyebrow {
+  margin: 0 0 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.api__heading {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.api__description {
+  margin: 1rem auto 0;
+  max-width: 32rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* Base URL card */
+
+.api__base {
+  margin-top: 2.5rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+  background: var(--color-surface, rgba(255, 255, 255, 0.03));
+}
+
+.api__base-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.api__base-row {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.api__base-url {
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.9375rem;
+  color: var(--color-accent);
+  overflow-wrap: anywhere;
+}
+
+/* Endpoint groups */
+
+.api__group {
+  margin-top: 3rem;
+}
+
+.api__group-title {
+  margin: 0 0 1rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.api__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.api__row {
+  padding: 1rem 1.125rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+  background: var(--color-surface, rgba(255, 255, 255, 0.02));
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.api__row:hover {
+  border-color: var(--color-accent);
+  background: var(--color-surface-hover, rgba(255, 255, 255, 0.045));
+}
+
+.api__row-main {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.api__method {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: 0.3125rem;
+  padding: 0.125rem 0.4375rem;
+}
+
+.api__path {
+  font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.api__query {
+  color: var(--color-text-muted);
+}
+
+.api__copy {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.api__copy:hover {
+  color: var(--color-accent);
+}
+
+.api__copy--base {
+  margin-left: 0;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.api__row-desc {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.api__row-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+/* Notice card */
+
+.api__notice {
+  margin-top: 2.5rem;
+  padding: 1.125rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-accent);
+  background: var(--color-surface, rgba(255, 255, 255, 0.03));
+}
+
+.api__notice-text {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .api {
+    padding: 5rem 1.25rem;
+  }
+
+  .api__row-main {
+    gap: 0.5rem;
+  }
+
+  .api__copy {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .api__container {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+}
