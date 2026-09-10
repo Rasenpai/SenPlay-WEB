@@ -814,6 +814,92 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "nontonanimeid",
+    title: "🟢 NontonAnimeID",
+
+    items: [
+      {
+        method: "GET",
+        path: "/api/nontonanimeid",
+        desc: "Info provider NontonAnimeID.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nontonanimeid/anime",
+        query: "?page=1",
+        desc: "Daftar anime NontonAnimeID.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nontonanimeid/anime/search",
+        query: "?q=naruto&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+        note: "Contoh query menggunakan kata kunci naruto.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nontonanimeid/anime/latest",
+        query: "?page=1",
+        desc: "Daftar episode terbaru dari NontonAnimeID.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nontonanimeid/anime/popular",
+        query: "?page=1",
+        desc: "Daftar anime populer dari NontonAnimeID.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nontonanimeid/schedule",
+        desc: "Jadwal rilis anime NontonAnimeID.",
+        note: "Response berisi anime, episode, waktu rilis WIB, rating, views, dan genre.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nontonanimeid/anime/:slug",
+        resolvedPath:
+          "/api/nontonanimeid/anime/isekai-wa-smartphone-to-tomo-ni",
+        desc: "Detail anime.",
+        note: "Slug sebaiknya diambil dari response endpoint anime, search, latest, popular, atau schedule.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nontonanimeid/episode/:slug",
+        resolvedPath:
+          "/api/nontonanimeid/episode/isekai-wa-smartphone-to-tomo-ni-episode-1",
+        desc: "Detail episode.",
+        note: "Gunakan slug episode yang diperoleh dari data episode anime.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nontonanimeid/episode/:slug/stream",
+        resolvedPath:
+          "/api/nontonanimeid/episode/isekai-wa-smartphone-to-tomo-ni-episode-1/stream",
+        desc: "Data stream episode.",
+        note: "Menggunakan slug episode yang sama dengan endpoint detail episode.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nontonanimeid/search",
+        query: "?q=naruto&page=1",
+        desc: "Pencarian global NontonAnimeID.",
+        note: "Mencari anime berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
