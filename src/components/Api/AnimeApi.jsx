@@ -19,22 +19,6 @@ const endpointGroups = [
         path: "/api/providers",
         desc: "Daftar semua provider.",
       },
-      {
-        method: "GET",
-        path: "/api/providers/:provider",
-        resolvedPath: "/api/providers/otakudesu",
-        desc: "Detail dan capability provider.",
-      },
-      {
-        method: "GET",
-        path: "/api/health",
-        desc: "Cek kesehatan API.",
-      },
-      {
-        method: "GET",
-        path: "/api/health/cache",
-        desc: "Cek status dan cache.",
-      },
     ],
   },
 
@@ -468,6 +452,113 @@ const endpointGroups = [
         method: "GET",
         path: "/api/anoboy/random",
         desc: "Anime acak.",
+      },
+    ],
+  },
+  {
+    id: "animekuindo",
+    title: "🟡 AnimeKuindo",
+    items: [
+      {
+        method: "GET",
+        path: "/api/animekuindo",
+        desc: "Info provider AnimeKuindo.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/anime",
+        query: "?page=1",
+        desc: "Daftar anime.",
+        note: "Mendukung filter tambahan seperti genre, status, type, sub, order (contoh: ?genre=action&status=completed&type=tv&order=popular).",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/anime/search",
+        query: "?q=black&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/anime/latest",
+        desc: "Episode terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/anime/popular",
+        desc: "Anime populer.",
+        note: "Popular AnimeKuindo mengembalikan slug episode, bukan slug detail anime — ini memang struktur dari source-nya.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/anime/new",
+        query: "?page=1",
+        desc: "Anime baru dirilis.",
+        note: "Pagination tersedia di endpoint ini.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/anime/top-rating",
+        desc: "Anime dengan rating tertinggi.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/anime/recommendations",
+        desc: "Daftar kategori rekomendasi beserta hasil default.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/anime/recommendations/:category",
+        resolvedPath: "/api/animekuindo/anime/recommendations/cgdct",
+        desc: "Rekomendasi anime berdasarkan kategori.",
+        note: "Kategori diambil dari response endpoint recommendations, contoh: cgdct, martial-arts, reverse-harem, shoujo, team-sports.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/anime/:slug",
+        resolvedPath: "/api/animekuindo/anime/black-clover",
+        desc: "Detail anime.",
+        note: "Slug sebaiknya diambil dari response list/search, jangan di-hardcode karena format slug upstream bisa berbeda.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/episode/:slug",
+        resolvedPath:
+          "/api/animekuindo/episode/black-clover-episode-170-subtitle-indonesia-selesai",
+        desc: "Detail episode.",
+        note: "Gunakan slug episode yang diperoleh dari data episode/list popular.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/episode/:slug/stream",
+        resolvedPath:
+          "/api/animekuindo/episode/black-clover-episode-170-subtitle-indonesia-selesai/stream",
+        desc: "Data stream episode.",
+        note: "Menggunakan slug episode yang sama dengan endpoint detail episode.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/filters",
+        desc: "Daftar pilihan filter yang tersedia.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/random",
+        desc: "Anime acak.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/blog",
+        query: "?page=1",
+        desc: "Daftar blog.",
+        note: "Pagination tersedia di endpoint ini.",
+      },
+      {
+        method: "GET",
+        path: "/api/animekuindo/blog/:slug",
+        resolvedPath:
+          "/api/animekuindo/blog/demon-slayer-infinity-castle-akhirnya-konfirmasi-tayang-di-crunchyroll-catat-tanggalnya",
+        desc: "Detail blog.",
+        note: "Slug diambil dari response endpoint blog list.",
       },
     ],
   },
