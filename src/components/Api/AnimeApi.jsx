@@ -412,6 +412,65 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "anoboy",
+    title: "🔵 AnoBoy",
+    items: [
+      {
+        method: "GET",
+        path: "/api/anoboy",
+        desc: "Info provider AnoBoy.",
+      },
+      {
+        method: "GET",
+        path: "/api/anoboy/anime",
+        query: "?page=1",
+        desc: "Daftar anime.",
+      },
+      {
+        method: "GET",
+        path: "/api/anoboy/anime/search",
+        query: "?q=one%20piece&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+      },
+      {
+        method: "GET",
+        path: "/api/anoboy/anime/latest",
+        desc: "15 episode terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/anoboy/anime/:slug",
+        resolvedPath: "/api/anoboy/anime/one-piece-indonesia",
+        desc: "Detail anime.",
+        note: "Slug sebaiknya diambil dari response list/search, jangan di-hardcode karena format slug upstream bisa berbeda.",
+      },
+      {
+        method: "GET",
+        path: "/api/anoboy/episode/:slug",
+        resolvedPath: "/api/anoboy/episode/one-piece-episode-1177",
+        desc: "Detail episode.",
+        note: "Gunakan slug episode yang diperoleh dari data episode.",
+      },
+      {
+        method: "GET",
+        path: "/api/anoboy/episode/:slug/stream",
+        resolvedPath: "/api/anoboy/episode/one-piece-episode-1177/stream",
+        desc: "Data stream episode.",
+        note: "Gunakan slug episode yang diperoleh dari endpoint detail anime.",
+      },
+      {
+        method: "GET",
+        path: "/api/anoboy/schedule",
+        desc: "Jadwal tayang anime.",
+      },
+      {
+        method: "GET",
+        path: "/api/anoboy/random",
+        desc: "Anime acak.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
