@@ -721,9 +721,9 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/winbu/anime/search",
-        query: "?q=perfect%20crown&page=1",
+        query: "?q=naruto&page=1",
         desc: "Mencari anime berdasarkan kata kunci.",
-        note: "Contoh menggunakan kata kunci yang tersedia pada Winbu.",
+        note: "Mendukung pencarian dan pagination menggunakan parameter q dan page.",
       },
 
       {
@@ -745,24 +745,23 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/winbu/anime/:slug",
-        resolvedPath: "/api/winbu/anime/jiang-ye-ever-night",
+        resolvedPath: "/api/winbu/anime/thunder-3",
         desc: "Detail anime.",
-        note: "Contoh menggunakan slug anime yang telah diverifikasi dari Winbu.",
+        note: "Contoh menggunakan slug anime Thunder 3 yang telah diverifikasi dari Winbu.",
       },
 
       {
         method: "GET",
         path: "/api/winbu/episode/:slug",
-        resolvedPath: "/api/winbu/episode/jiang-ye-ever-night-episode-19",
+        resolvedPath: "/api/winbu/episode/thunder-3-episode-1",
         desc: "Detail episode.",
-        note: "Contoh menggunakan slug episode yang telah diverifikasi dari Winbu.",
+        note: "Contoh menggunakan slug episode Thunder 3 yang telah diverifikasi dari Winbu.",
       },
 
       {
         method: "GET",
         path: "/api/winbu/episode/:slug/stream",
-        resolvedPath:
-          "/api/winbu/episode/jiang-ye-ever-night-episode-19/stream",
+        resolvedPath: "/api/winbu/episode/thunder-3-episode-1/stream",
         desc: "Data stream episode.",
         note: "Mengambil player/iframe dari server streaming yang tersedia pada halaman episode Winbu.",
       },
@@ -796,7 +795,7 @@ const endpointGroups = [
         path: "/api/winbu/series/:slug",
         resolvedPath: "/api/winbu/series/perfect-crown",
         desc: "Detail series.",
-        note: "Contoh menggunakan slug series yang telah diverifikasi dari Winbu.",
+        note: "Contoh menggunakan slug series Perfect Crown yang telah diverifikasi dari Winbu.",
       },
 
       {
