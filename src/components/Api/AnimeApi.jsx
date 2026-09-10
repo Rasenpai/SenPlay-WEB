@@ -699,6 +699,122 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "winbu",
+    title: "🟢 Winbu",
+
+    items: [
+      {
+        method: "GET",
+        path: "/api/winbu",
+        desc: "Info provider Winbu.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/anime",
+        query: "?page=1",
+        desc: "Daftar anime dan donghua dari Winbu.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/anime/search",
+        query: "?q=perfect%20crown&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+        note: "Contoh menggunakan kata kunci yang tersedia pada Winbu.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/anime/latest",
+        query: "?page=1",
+        desc: "Daftar anime terbaru dari Winbu.",
+        note: "Mengambil data terbaru dari archive Winbu, menyaring film dan episode, serta mendukung pagination.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/anime/popular",
+        query: "?page=1",
+        desc: "Daftar anime populer dari Winbu.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/anime/:slug",
+        resolvedPath: "/api/winbu/anime/jiang-ye-ever-night",
+        desc: "Detail anime.",
+        note: "Contoh menggunakan slug anime yang telah diverifikasi dari Winbu.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/episode/:slug",
+        resolvedPath: "/api/winbu/episode/jiang-ye-ever-night-episode-19",
+        desc: "Detail episode.",
+        note: "Contoh menggunakan slug episode yang telah diverifikasi dari Winbu.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/episode/:slug/stream",
+        resolvedPath:
+          "/api/winbu/episode/jiang-ye-ever-night-episode-19/stream",
+        desc: "Data stream episode.",
+        note: "Mengambil player/iframe dari server streaming yang tersedia pada halaman episode Winbu.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/film",
+        query: "?page=1",
+        desc: "Daftar film dari Winbu.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/film/latest",
+        query: "?page=1",
+        desc: "Daftar film terbaru dari Winbu.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/series",
+        query: "?page=1",
+        desc: "Daftar series dari Winbu.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/series/:slug",
+        resolvedPath: "/api/winbu/series/perfect-crown",
+        desc: "Detail series.",
+        note: "Contoh menggunakan slug series yang telah diverifikasi dari Winbu.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/schedule",
+        desc: "Jadwal rilis anime dari Winbu.",
+        note: "Response berisi jadwal berdasarkan hari dari Senin sampai Minggu.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/winbu/search",
+        query: "?q=perfect%20crown&page=1",
+        desc: "Pencarian global pada Winbu.",
+        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
