@@ -567,6 +567,138 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "nimegami",
+    title: "🟣 Nimegami",
+
+    items: [
+      {
+        method: "GET",
+        path: "/api/nimegami",
+        desc: "Info provider Nimegami.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime",
+        query: "?page=1",
+        desc: "Daftar anime Nimegami.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/search",
+        query: "?q=naruto&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+        note: "Contoh query menggunakan kata kunci naruto.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/latest",
+        desc: "Daftar episode terbaru dari Nimegami.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/popular",
+        desc: "Daftar anime populer dari Nimegami.",
+        note: "Data mengikuti struktur popular yang tersedia pada source Nimegami.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/new",
+        query: "?page=1",
+        desc: "Daftar anime baru dari Nimegami.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/top-rating",
+        desc: "Daftar anime dengan rating tertinggi dari Nimegami.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/recommendations",
+        desc: "Daftar rekomendasi anime dari Nimegami.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/:slug",
+        resolvedPath:
+          "/api/nimegami/anime/argonavis-movie-ryuusei-no-obligato-sub-indo",
+        desc: "Detail anime.",
+        note: "Slug sebaiknya diambil dari response endpoint anime, search, atau archive.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/episode/:slug",
+        resolvedPath:
+          "/api/nimegami/episode/argonavis-movie-ryuusei-no-obligato-sub-indo",
+        desc: "Detail episode.",
+        note: "Gunakan slug episode yang diperoleh dari data episode anime.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/episode/:slug/stream",
+        resolvedPath:
+          "/api/nimegami/episode/argonavis-movie-ryuusei-no-obligato-sub-indo/stream",
+        desc: "Data stream episode.",
+        note: "Menggunakan slug episode yang sama dengan endpoint detail episode.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/filters",
+        desc: "Daftar genre dan type yang tersedia sebagai filter.",
+        note: "Genre menggunakan slug seperti action atau drama. Type menggunakan slug seperti movie atau tv.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/random",
+        desc: "Mengambil satu anime secara acak.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/schedule",
+        desc: "Jadwal rilis anime Nimegami.",
+        note: "Response berisi jadwal berdasarkan hari serta daftar anime yang tersedia.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/az",
+        query: "?letter=A&page=1",
+        desc: "Daftar anime berdasarkan huruf A-Z.",
+        note: "Gunakan parameter letter seperti A, B, C, dan seterusnya. Mendukung pagination.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/category/:category",
+        resolvedPath: "/api/nimegami/anime/category/action",
+        desc: "Daftar anime berdasarkan kategori/genre.",
+        note: "Gunakan slug kategori yang tersedia pada response endpoint filters. Contoh: action atau drama.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/nimegami/anime/type/:type",
+        resolvedPath: "/api/nimegami/anime/type/movie",
+        desc: "Daftar anime berdasarkan type.",
+        note: "Gunakan slug type yang tersedia pada response endpoint filters. Contoh: movie atau tv.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
