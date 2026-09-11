@@ -171,7 +171,7 @@ const endpointGroups = [
       {
         method: "GET",
         path: "/api/komikindo/manga/:slug",
-        resolvedPath: "/api/komikindo/manga/days",
+        resolvedPath: "/api/komikindo/manga/229848-solo-leveling",
         desc: "Detail manga.",
         note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: days (76 chapter). Contoh slug lain di KomikIndo: sakamoto-days, watashi-no-oshi-wa-akuyaku-reijou, kimi-to-tsuzuru-utakata, tsue-to-tsurugi-no-wistoria.",
       },
@@ -204,9 +204,8 @@ const baseUrlExamples = [
   "/api/komiku/chapter/moimon-chapter-1",
 ];
 
-// Dummy — ganti/tambah begitu ada provider komik lain selain Komiku.
-const STABLE_PROVIDER_IDS = ["komiku"];
-const RECOMMENDED_PROVIDER_ID = "KomikIndo";
+const STABLE_PROVIDER_IDS = ["komiku", "bacakomik", "komikindo"];
+const RECOMMENDED_PROVIDER_ID = "komikindo";
 
 const isMac =
   typeof navigator !== "undefined" &&
