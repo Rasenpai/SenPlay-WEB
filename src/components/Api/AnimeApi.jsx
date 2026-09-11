@@ -900,6 +900,85 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "animeindo",
+    title: "🟢 Animeindo",
+
+    items: [
+      {
+        method: "GET",
+        path: "/api/animeindo",
+        desc: "Info provider Animeindo.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animeindo/anime",
+        query: "?page=1",
+        desc: "Daftar anime Animeindo.",
+        note: "Berisi katalog anime Animeindo dan mendukung parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animeindo/anime/search",
+        query: "?q=naruto&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+        note: "Contoh query menggunakan kata kunci naruto.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animeindo/anime/latest",
+        query: "?page=1",
+        desc: "Daftar episode anime terbaru dari Animeindo.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animeindo/anime/popular",
+        query: "?page=1",
+        desc: "Daftar anime populer dari Animeindo.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animeindo/anime/:slug",
+        resolvedPath:
+          "/api/animeindo/anime/tensei-shitara-slime-datta-ken-4th-season",
+        desc: "Detail anime Animeindo.",
+        note: "Slug sebaiknya diambil dari response endpoint anime, search, latest, atau popular.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animeindo/episode/:slug",
+        resolvedPath:
+          "/api/animeindo/episode/tensei-shitara-slime-datta-ken-4th-season-episode-1",
+        desc: "Detail episode Animeindo.",
+        note: "Gunakan slug episode yang diperoleh dari data episode anime.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animeindo/episode/:slug/stream",
+        resolvedPath:
+          "/api/animeindo/episode/tensei-shitara-slime-datta-ken-4th-season-episode-1/stream",
+        desc: "Data stream episode Animeindo.",
+        note: "Menggunakan slug episode yang sama dengan endpoint detail episode.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animeindo/search",
+        query: "?q=naruto&page=1",
+        desc: "Pencarian global Animeindo.",
+        note: "Mencari anime berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
