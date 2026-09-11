@@ -1066,82 +1066,158 @@ const endpointGroups = [
     ],
   },
   {
-  id: "gomunime",
-  title: "🟢 Gomunime",
+    id: "gomunime",
+    title: "🟢 Gomunime",
 
-  items: [
-    {
-      method: "GET",
-      path: "/api/gomunime",
-      desc: "Info provider Gomunime.",
-    },
-    {
-      method: "GET",
-      path: "/api/gomunime/anime",
-      query: "?page=1",
-      desc: "Daftar anime Gomunime.",
-      note: "Berisi katalog anime Gomunime dan mendukung parameter page.",
-    },
-    {
-      method: "GET",
-      path: "/api/gomunime/anime/search",
-      query: "?q=naruto&page=1",
-      desc: "Mencari anime berdasarkan kata kunci.",
-      note: "Contoh query menggunakan kata kunci naruto.",
-    },
-    {
-      method: "GET",
-      path: "/api/gomunime/anime/latest",
-      query: "?page=1",
-      desc: "Daftar anime terbaru dari Gomunime.",
-      note: "Mendukung pagination menggunakan parameter page.",
-    },
-    {
-      method: "GET",
-      path: "/api/gomunime/anime/popular",
-      query: "?page=1",
-      desc: "Daftar anime populer dari Gomunime.",
-      note: "Mendukung pagination menggunakan parameter page.",
-    },
-    {
-      method: "GET",
-      path: "/api/gomunime/anime/:slug",
-      resolvedPath:
-        "/api/gomunime/anime/tensei-shitara-slime-datta-ken-4th-season",
-      desc: "Detail anime Gomunime.",
-      note: "Slug sebaiknya diambil dari response endpoint anime, search, latest, atau popular.",
-    },
-    {
-      method: "GET",
-      path: "/api/gomunime/episode/:slug",
-      resolvedPath:
-        "/api/gomunime/episode/tensei-shitara-slime-datta-ken-4th-season-episode-21",
-      desc: "Detail episode Gomunime.",
-      note: "Gunakan slug episode yang diperoleh dari data episode anime.",
-    },
-    {
-      method: "GET",
-      path: "/api/gomunime/episode/:slug/stream",
-      resolvedPath:
-        "/api/gomunime/episode/tensei-shitara-slime-datta-ken-4th-season-episode-21/stream",
-      desc: "Data stream episode Gomunime.",
-      note: "Menggunakan slug episode yang sama dengan endpoint detail episode.",
-    },
-    {
-      method: "GET",
-      path: "/api/gomunime/schedule",
-      desc: "Jadwal rilis anime Gomunime.",
-      note: "Endpoint jadwal Gomunime.",
-    },
-    {
-      method: "GET",
-      path: "/api/gomunime/search",
-      query: "?q=naruto&page=1",
-      desc: "Pencarian global Gomunime.",
-      note: "Mencari anime berdasarkan kata kunci dan mendukung pagination.",
-    },
-  ],
-},
+    items: [
+      {
+        method: "GET",
+        path: "/api/gomunime",
+        desc: "Info provider Gomunime.",
+      },
+      {
+        method: "GET",
+        path: "/api/gomunime/anime",
+        query: "?page=1",
+        desc: "Daftar anime Gomunime.",
+        note: "Berisi katalog anime Gomunime dan mendukung parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/gomunime/anime/search",
+        query: "?q=naruto&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+        note: "Contoh query menggunakan kata kunci naruto.",
+      },
+      {
+        method: "GET",
+        path: "/api/gomunime/anime/latest",
+        query: "?page=1",
+        desc: "Daftar anime terbaru dari Gomunime.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/gomunime/anime/popular",
+        query: "?page=1",
+        desc: "Daftar anime populer dari Gomunime.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/gomunime/anime/:slug",
+        resolvedPath:
+          "/api/gomunime/anime/tensei-shitara-slime-datta-ken-4th-season",
+        desc: "Detail anime Gomunime.",
+        note: "Slug sebaiknya diambil dari response endpoint anime, search, latest, atau popular.",
+      },
+      {
+        method: "GET",
+        path: "/api/gomunime/episode/:slug",
+        resolvedPath:
+          "/api/gomunime/episode/tensei-shitara-slime-datta-ken-4th-season-episode-21",
+        desc: "Detail episode Gomunime.",
+        note: "Gunakan slug episode yang diperoleh dari data episode anime.",
+      },
+      {
+        method: "GET",
+        path: "/api/gomunime/episode/:slug/stream",
+        resolvedPath:
+          "/api/gomunime/episode/tensei-shitara-slime-datta-ken-4th-season-episode-21/stream",
+        desc: "Data stream episode Gomunime.",
+        note: "Menggunakan slug episode yang sama dengan endpoint detail episode.",
+      },
+      {
+        method: "GET",
+        path: "/api/gomunime/schedule",
+        desc: "Jadwal rilis anime Gomunime.",
+        note: "Endpoint jadwal Gomunime.",
+      },
+      {
+        method: "GET",
+        path: "/api/gomunime/search",
+        query: "?q=naruto&page=1",
+        desc: "Pencarian global Gomunime.",
+        note: "Mencari anime berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
+  {
+    id: "nekopoi",
+    title: "🟢 NekoPoi",
+
+    items: [
+      {
+        method: "GET",
+        path: "/api/nekopoi",
+        desc: "Info provider NekoPoi.",
+      },
+      {
+        method: "GET",
+        path: "/api/nekopoi/anime",
+        query: "?page=1",
+        desc: "Daftar anime NekoPoi.",
+        note: "Berisi katalog anime NekoPoi dan mendukung parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/nekopoi/anime/search",
+        query: "?q=naruto&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+        note: "Contoh query menggunakan kata kunci naruto.",
+      },
+      {
+        method: "GET",
+        path: "/api/nekopoi/anime/latest",
+        query: "?page=1",
+        desc: "Daftar anime terbaru dari NekoPoi.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/nekopoi/anime/popular",
+        query: "?page=1",
+        desc: "Daftar anime populer dari NekoPoi.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/nekopoi/anime/:slug",
+        resolvedPath: "/api/nekopoi/anime/ano-ko-no-kawari-ni-suki-na-dake",
+        desc: "Detail anime NekoPoi.",
+        note: "Slug sebaiknya diambil dari response endpoint anime, search, latest, atau popular.",
+      },
+      {
+        method: "GET",
+        path: "/api/nekopoi/episode/:slug",
+        resolvedPath:
+          "/api/nekopoi/episode/ano-ko-no-kawari-ni-suki-na-dake-episode-2-subtitle-indonesia",
+        desc: "Detail episode NekoPoi.",
+        note: "Gunakan slug episode yang diperoleh dari data episode anime.",
+      },
+      {
+        method: "GET",
+        path: "/api/nekopoi/episode/:slug/stream",
+        resolvedPath:
+          "/api/nekopoi/episode/ano-ko-no-kawari-ni-suki-na-dake-episode-2-subtitle-indonesia/stream",
+        desc: "Data stream episode NekoPoi.",
+        note: "Menggunakan slug episode yang sama dengan endpoint detail episode.",
+      },
+      {
+        method: "GET",
+        path: "/api/nekopoi/schedule",
+        desc: "Jadwal rilis anime NekoPoi.",
+        note: "Endpoint jadwal NekoPoi.",
+      },
+      {
+        method: "GET",
+        path: "/api/nekopoi/search",
+        query: "?q=naruto&page=1",
+        desc: "Pencarian global NekoPoi.",
+        note: "Mencari anime berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
