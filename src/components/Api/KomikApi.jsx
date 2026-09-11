@@ -76,6 +76,64 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "bacakomik",
+    title: "📗 BacaKomik",
+    items: [
+      {
+        method: "GET",
+        path: "/api/bacakomik",
+        desc: "Info provider BacaKomik.",
+      },
+      {
+        method: "GET",
+        path: "/api/bacakomik/manga",
+        query: "?page=1",
+        desc: "Daftar manga.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/bacakomik/manga/search",
+        query: "?q=moimon&page=1",
+        desc: "Mencari manga berdasarkan kata kunci.",
+      },
+      {
+        method: "GET",
+        path: "/api/bacakomik/manga/latest",
+        query: "?page=1",
+        desc: "Manga terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/bacakomik/manga/popular",
+        query: "?page=1",
+        desc: "Manga populer.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/bacakomik/manga/:slug",
+        resolvedPath: "/api/bacakomik/manga/moimon",
+        desc: "Detail manga.",
+        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: moimon.",
+      },
+      {
+        method: "GET",
+        path: "/api/bacakomik/chapter/:slug",
+        resolvedPath: "/api/bacakomik/chapter/moimon-chapter-1",
+        desc: "Detail chapter.",
+        note: "Gunakan slug chapter yang diperoleh dari data chapter manga. Contoh yang sudah diverifikasi: moimon-chapter-1.",
+      },
+      {
+        method: "GET",
+        path: "/api/bacakomik/search",
+        query: "?q=moimon&page=1",
+        desc: "Pencarian global BacaKomik.",
+        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
@@ -526,11 +584,11 @@ export default function KomikApi() {
             <span />
           </div>
           <h2 id="komik-api-heading" className="api__heading">
-            SenPlay Komik API
+            SENP4II Komik API
           </h2>
           <p className="api__description">
-            REST API yang menyuplai data manga/komik SenPlay dari beberapa
-            provider, dimulai dengan Komiku.
+            REST API yang menyuplai data manga/komik dari beberapa provider,
+            dimulai dengan Komiku.
           </p>
 
           <div className="api__base">

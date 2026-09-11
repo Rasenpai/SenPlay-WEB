@@ -1684,7 +1684,7 @@ export default function AnimeApi() {
             <span />
           </div>
           <h2 id="anime-api-heading" className="api__heading">
-            SenPlay Anime API
+            SENP4II Anime API
           </h2>
           <p className="api__description">
             REST API yang menyuplai data anime dari beberapa provider, dimulai
