@@ -1035,7 +1035,7 @@ const endpointGroups = [
         method: "GET",
         path: "/api/animekompi/episode/:slug",
         resolvedPath:
-          "/api/animekompi/episode/tensei-shitara-slime-datta-ken-4th-season-episode-1-subtitle-indonesia",
+          "/api/animekompi/episode/tensei-shitara-slime-datta-ken-4th-season-episode-21-subtitle-indonesia",
         desc: "Detail episode AnimeKompi.",
         note: "Gunakan slug episode yang diperoleh dari data episode anime.",
       },
@@ -1044,7 +1044,7 @@ const endpointGroups = [
         method: "GET",
         path: "/api/animekompi/episode/:slug/stream",
         resolvedPath:
-          "/api/animekompi/episode/tensei-shitara-slime-datta-ken-4th-season-episode-1-subtitle-indonesia/stream",
+          "/api/animekompi/episode/tensei-shitara-slime-datta-ken-4th-season-episode-21-subtitle-indonesia/stream",
         desc: "Data stream episode AnimeKompi.",
         note: "Menggunakan slug episode yang sama dengan endpoint detail episode.",
       },
