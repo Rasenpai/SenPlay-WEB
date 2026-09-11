@@ -14,6 +14,7 @@ import {
   DEFAULT_DESCRIPTION,
   websiteJsonLd,
 } from "./lib/seo-config";
+import KomikApi from "./components/Api/KomikApi";
 
 const NAVBAR_OFFSET_REM = 4;
 
@@ -53,6 +54,10 @@ export default function App() {
 
   if (path === "/anime") {
     return <AnimeApi />;
+  }
+
+  if (path === "/komik") {
+    return <KomikApi />;
   }
 
   return (
