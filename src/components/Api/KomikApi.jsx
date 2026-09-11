@@ -234,11 +234,10 @@ const endpointGroups = [
       },
       {
         method: "GET",
-        path: "/api/natsu/chapter/:slug",
-        query: "?manga=:mangaSlug",
-        resolvedPath: "/api/natsu/chapter/chapter-1.31984?manga=sakamoto-days",
+        path: "/api/natsu/chapter/:manga/:slug",
+        resolvedPath: "/api/natsu/chapter/sakamoto-days/chapter-1.31984",
         desc: "Detail chapter (reader).",
-        note: "Wajib menyertakan query manga=<slug manga>. Contoh yang sudah PASS: chapter-1.31984, chapter-274.408500, chapter-273.404196, chapter-272.400733 (manga=sakamoto-days). Hasil test chapter-1.31984: totalImages 52, gambar pertama https://cdn.natsu.id/img/S/sakamoto-days/1/1.jpg, gambar terakhir https://cdn.natsu.id/img/S/sakamoto-days/1/52.jpg.",
+        note: "Manga slug dan chapter slug wajib disertakan. Contoh yang sudah PASS: /api/natsu/chapter/sakamoto-days/chapter-1.31984, /api/natsu/chapter/sakamoto-days/chapter-274.408500, /api/natsu/chapter/sakamoto-days/chapter-273.404196, /api/natsu/chapter/sakamoto-days/chapter-272.400733. Hasil test chapter-1.31984: totalImages 52, gambar pertama https://cdn.natsu.id/img/S/sakamoto-days/1/1.jpg, gambar terakhir https://cdn.natsu.id/img/S/sakamoto-days/1/52.jpg.",
       },
       {
         method: "GET",
