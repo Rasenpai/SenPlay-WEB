@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "../../styles/AnimeApi.css";
 
 const baseUrl = "https://api.senplay.web.id";
 const THEME_STORAGE_KEY = "senplay-api-theme";
 
+// ---------------------------------------------------------------------------
+// endpointGroups — SUMBER DATA ASLI, TIDAK DIUBAH.
+// Silakan tempel ulang backup `endpointGroups` Anda persis di sini
+// (isi, urutan, id, title, items — semuanya sama seperti sebelumnya).
+// Semua logic di bawah ini hanya MEMBACA array ini, tidak pernah menulis
+// atau memodifikasinya.
+// ---------------------------------------------------------------------------
 const endpointGroups = [
   {
     id: "docs",
@@ -1224,16 +1231,31 @@ const totalEndpoints = endpointGroups.reduce(
   (sum, group) => sum + group.items.length,
   0,
 );
+const totalProviders = endpointGroups.length;
 
 const baseUrlExamples = [
   "/api/otakudesu/anime?page=1",
   "/api/otakudesu/episode/mskmctn-episode-11-sub-indo/stream",
 ];
 
+// Provider yang dianggap stabil, dan satu yang jadi rekomendasi utama.
+// Diambil berdasarkan `id` pada endpointGroups — tidak menyalin/menduplikasi
+// data endpoint itu sendiri.
+const STABLE_PROVIDER_IDS = ["otakudesu", "animasu", "winbu", "nontonanimeid"];
+const RECOMMENDED_PROVIDER_ID = "nontonanimeid";
+
+const isMac =
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPad/.test(navigator.platform ?? navigator.userAgent ?? "");
+
+// ---------------------------------------------------------------------------
+// Icons
+// ---------------------------------------------------------------------------
+
 function CopyIcon() {
   return (
     <svg
-      className="api__copy-icon"
+      className="api__icon"
       viewBox="0 0 24 24"
       width="14"
       height="14"
@@ -1251,7 +1273,7 @@ function CopyIcon() {
 function CheckIcon() {
   return (
     <svg
-      className="api__copy-icon"
+      className="api__icon"
       viewBox="0 0 24 24"
       width="14"
       height="14"
@@ -1300,92 +1322,262 @@ function MoonIcon() {
   );
 }
 
-function EndpointCard({ item }) {
+function SearchIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="17"
+      height="17"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"
+      />
+    </svg>
+  );
+}
+
+function ClearIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M12 10.59 16.59 6 18 7.41 13.41 12 18 16.59 16.59 18 12 13.41 7.41 18 6 16.59 10.59 12 6 7.41 7.41 6z"
+      />
+    </svg>
+  );
+}
+
+function ChevronIcon({ open }) {
+  return (
+    <svg
+      className={`api__chevron${open ? " api__chevron--open" : ""}`}
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"
+      />
+    </svg>
+  );
+}
+
+function ExternalIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="13"
+      height="13"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zm3 16H5V7h6V5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6h-2z"
+      />
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Small helpers
+// ---------------------------------------------------------------------------
+
+function highlightMatch(text, query) {
+  if (!query) return text;
+  const idx = text.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return text;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <mark className="api__mark">{text.slice(idx, idx + query.length)}</mark>
+      {text.slice(idx + query.length)}
+    </>
+  );
+}
+
+function useCopy() {
   const [copied, setCopied] = useState(false);
+  const copy = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1400);
+    } catch {
+      // Clipboard tidak tersedia; abaikan.
+    }
+  };
+  return [copied, copy];
+}
+
+// ---------------------------------------------------------------------------
+// Endpoint row (accordion item) — menggantikan grid card lama.
+// ---------------------------------------------------------------------------
+
+function EndpointRow({ item }) {
+  const [open, setOpen] = useState(false);
+  const [copied, copy] = useCopy();
   const requestPath = item.resolvedPath ?? item.path;
   const fullPath = `${requestPath}${item.query ?? ""}`;
   const fullUrl = `${baseUrl}${fullPath}`;
+  const hasDetail = Boolean(item.query || item.resolvedPath || item.note);
 
-  const handleCopy = async (e) => {
-    e.stopPropagation();
-    try {
-      await navigator.clipboard.writeText(fullUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard not available; ignore silently.
-    }
-  };
-
-  const openEndpoint = () => {
+  const handleOpen = () => {
     window.open(fullUrl, "_blank", "noopener,noreferrer");
   };
 
-  const handleKeyDown = (e) => {
+  const handleRowKeyDown = (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      openEndpoint();
+      handleOpen();
     }
   };
 
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    setOpen((v) => !v);
+  };
+
+  const handleCopy = (e) => {
+    e.stopPropagation();
+    copy(fullUrl);
+  };
+
   return (
-    <li
-      className="api__card"
-      role="button"
-      tabIndex={0}
-      onClick={openEndpoint}
-      onKeyDown={handleKeyDown}
-      aria-label={`Buka ${fullPath} di tab baru`}
-    >
-      <p className="api__card-title">{item.desc}</p>
-      <div className="api__card-endpoint">
-        <span className="api__method">{item.method}</span>
-        <code className="api__path">{item.path}</code>
-        <button
-          type="button"
-          className="api__copy"
-          onClick={handleCopy}
-          aria-label={`Salin endpoint ${fullPath}`}
-        >
-          {copied ? <CheckIcon /> : <CopyIcon />}
-        </button>
+    <li className={`api__row${open ? " api__row--open" : ""}`}>
+      <div
+        className="api__row-main"
+        role="button"
+        tabIndex={0}
+        onClick={handleOpen}
+        onKeyDown={handleRowKeyDown}
+        aria-label={`Buka ${fullPath} di tab baru`}
+      >
+        <span className="api__row-method">{item.method}</span>
+        <code className="api__row-path">{item.path}</code>
+        <span className="api__row-desc">{item.desc}</span>
+
+        <span className="api__row-actions">
+          {hasDetail && (
+            <button
+              type="button"
+              className="api__iconbtn"
+              onClick={handleToggle}
+              aria-expanded={open}
+              aria-label={open ? "Sembunyikan detail" : "Lihat detail endpoint"}
+            >
+              <ChevronIcon open={open} />
+            </button>
+          )}
+          <button
+            type="button"
+            className="api__iconbtn"
+            onClick={handleCopy}
+            aria-label={`Salin endpoint ${fullPath}`}
+          >
+            {copied ? <CheckIcon /> : <CopyIcon />}
+          </button>
+          <span className="api__iconbtn api__iconbtn--ghost" aria-hidden="true">
+            <ExternalIcon />
+          </span>
+        </span>
       </div>
-      {item.query && (
-        <p className="api__card-meta">
-          Query: <code>{item.query}</code>
-        </p>
+
+      {hasDetail && open && (
+        <div className="api__row-detail">
+          {item.query && (
+            <p className="api__row-meta">
+              <span>Query</span>
+              <code>{item.query}</code>
+            </p>
+          )}
+          {item.resolvedPath && (
+            <p className="api__row-meta">
+              <span>Contoh</span>
+              <code>{item.resolvedPath}</code>
+            </p>
+          )}
+          {item.note && <p className="api__row-note">{item.note}</p>}
+        </div>
       )}
-      {item.resolvedPath && (
-        <p className="api__card-meta">
-          Contoh: <code>{item.resolvedPath}</code>
-        </p>
-      )}
-      {item.note && <p className="api__card-note">{item.note}</p>}
     </li>
   );
 }
 
-function BaseUrlExample({ path }) {
-  const [copied, setCopied] = useState(false);
-  const fullUrl = `${baseUrl}${path}`;
+// ---------------------------------------------------------------------------
+// Provider section (accordion group)
+// ---------------------------------------------------------------------------
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(fullUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard not available; ignore silently.
-    }
-  };
+function ProviderSection({ group, query, forceOpen, isOpen, onToggle }) {
+  const open = forceOpen || isOpen;
+  const isStable = STABLE_PROVIDER_IDS.includes(group.id);
+  const isRecommended = group.id === RECOMMENDED_PROVIDER_ID;
 
   return (
-    <li className="api__base-example">
-      <code className="api__base-example-url">{fullUrl}</code>
+    <section
+      className={`api__group${isRecommended ? " api__group--recommended" : ""}`}
+    >
       <button
         type="button"
-        className="api__copy"
-        onClick={handleCopy}
+        className="api__group-header"
+        onClick={() => onToggle(group.id)}
+        aria-expanded={open}
+      >
+        <span className="api__group-title">{group.title}</span>
+        <span className="api__group-id">
+          #{highlightMatch(group.id, query)}
+        </span>
+
+        {isRecommended && (
+          <span className="api__badge api__badge--recommended">
+            Rekomendasi utama
+          </span>
+        )}
+        {!isRecommended && isStable && (
+          <span className="api__badge api__badge--stable">Stable</span>
+        )}
+
+        <span className="api__group-count">{group.items.length} endpoint</span>
+        <ChevronIcon open={open} />
+      </button>
+
+      {open && (
+        <ul className="api__rows">
+          {group.items.map((item) => (
+            <EndpointRow item={item} key={item.path} />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Base URL capsule
+// ---------------------------------------------------------------------------
+
+function BaseUrlExample({ path }) {
+  const [copied, copy] = useCopy();
+  const fullUrl = `${baseUrl}${path}`;
+  return (
+    <li className="api__example">
+      <code>{fullUrl}</code>
+      <button
+        type="button"
+        className="api__iconbtn"
+        onClick={() => copy(fullUrl)}
         aria-label={`Salin contoh URL ${fullUrl}`}
       >
         {copied ? <CheckIcon /> : <CopyIcon />}
@@ -1394,41 +1586,23 @@ function BaseUrlExample({ path }) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
 export default function AnimeApi() {
-  const sectionRef = useRef(null);
-
-  // FIX: default ke true. Sebelumnya default-nya bergantung pada
-  // prefers-reduced-motion + IntersectionObserver, dan kalau observer-nya
-  // gagal trigger (mis. section sudah full-height saat mount pertama),
-  // `visible` tidak akan pernah jadi true -> .api__container permanen
-  // opacity: 0 di CSS -> halaman terlihat blank walau semua elemen ada.
-  const [visible, setVisible] = useState(true);
-
-  const [baseCopied, setBaseCopied] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "dark";
     try {
       return window.localStorage.getItem(THEME_STORAGE_KEY) || "dark";
     } catch {
-      // localStorage bisa saja diblokir (private mode / storage penuh).
       return "dark";
     }
   });
-
-  // Animasi fade-in tetap dipertahankan sebagai progressive enhancement:
-  // konten sudah default visible, observer ini cuma dipakai kalau nanti
-  // mau bikin efek "muncul saat di-scroll ke section lain" — sekarang
-  // tidak dipakai untuk menyembunyikan konten di awal.
-  useEffect(() => {
-    const node = sectionRef.current;
-    if (!node) return;
-    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
-      return;
-    }
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
-  }, []);
+  const [baseCopied, copyBase] = useCopy();
+  const [query, setQuery] = useState("");
+  const [openGroups, setOpenGroups] = useState(() => new Set());
+  const searchRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -1438,26 +1612,56 @@ export default function AnimeApi() {
     }
   }, [theme]);
 
-  const handleCopyBase = async () => {
-    try {
-      await navigator.clipboard.writeText(baseUrl);
-      setBaseCopied(true);
-      setTimeout(() => setBaseCopied(false), 1500);
-    } catch {
-      // Clipboard not available; ignore silently.
-    }
+  // Ctrl+K / Cmd+K memfokuskan search box.
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const isShortcut =
+        (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
+      if (isShortcut) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (e.key === "Escape" && document.activeElement === searchRef.current) {
+        setQuery("");
+        searchRef.current?.blur();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const trimmedQuery = query.trim();
+
+  // Search membaca langsung dari endpointGroups berdasarkan `id`, tanpa
+  // pernah memodifikasi array aslinya.
+  const filteredGroups = useMemo(() => {
+    if (!trimmedQuery) return endpointGroups;
+    const q = trimmedQuery.toLowerCase();
+    return endpointGroups.filter((group) => group.id.toLowerCase().includes(q));
+  }, [trimmedQuery]);
+
+  const resultEndpointCount = useMemo(
+    () => filteredGroups.reduce((sum, group) => sum + group.items.length, 0),
+    [filteredGroups],
+  );
+
+  const toggleGroup = (id) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
-  const toggleTheme = () => {
-    setTheme((t) => (t === "dark" ? "light" : "dark"));
-  };
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+  const shortcutLabel = isMac ? "⌘K" : "Ctrl K";
 
   return (
     <section
       id="anime-api"
-      ref={sectionRef}
       data-theme={theme}
-      className={`api${visible ? " api--visible" : ""}`}
+      className="api"
       aria-labelledby="anime-api-heading"
     >
       <button
@@ -1472,78 +1676,162 @@ export default function AnimeApi() {
       </button>
 
       <div className="api__container">
-        <p className="api__eyebrow">DOKUMENTASI API</p>
-        <h2 id="anime-api-heading" className="api__heading">
-          Anime API
-        </h2>
-        <p className="api__description">
-          REST API yang menyuplai data anime SenPlay dari beberapa provider,
-          dimulai dengan Samehadaku dan Otakudesu.
-        </p>
-
-        <div className="api__warning">
-          <p className="api__warning-title">⚠️ PERINGATAN RATE LIMIT</p>
-          <p className="api__warning-line">
-            <strong>Rate Limit:</strong> 30 Request per menit
-          </p>
-          <p className="api__warning-line">
-            <strong>Pelanggaran:</strong> Jika Anda melewati batas, Anda akan
-            mendapatkan 3 kali peringatan sebelum <strong>BAN PERMANEN</strong>
-          </p>
-          <p className="api__warning-line">
-            ⚡ Gunakan API dengan bijak dan jangan spamming!
-          </p>
-          <p className="api__warning-line">
-            🛡️ <strong>Tujuan Rate Limit:</strong> Melindungi server dari
-            serangan Hama DDoS dan aktivitas spammer yang dapat mengganggu
-            layanan untuk pengguna lain.
-          </p>
-          <hr className="api__warning-divider" />
-          <p className="api__warning-line">
-            💼 <strong>Ingin Di Whitelist dari Rate Limit?</strong> Silahkan
-            Hubungi kami
-          </p>
-          <p className="api__warning-line">
-            🔓 <strong>Terkena Ban?</strong> Hubungi kami untuk unban{" "}
-            <strong>GRATIS</strong>
-          </p>
-        </div>
-
-        <div className="api__base">
-          <div className="api__base-label">🌐 Base URL Production</div>
-          <div className="api__base-row">
-            <code className="api__base-url">{baseUrl}</code>
-            <button
-              type="button"
-              className="api__copy api__copy--base"
-              onClick={handleCopyBase}
-              aria-label="Salin base URL"
-            >
-              {baseCopied ? <CheckIcon /> : <CopyIcon />}
-              <span>{baseCopied ? "Tersalin" : "Salin"}</span>
-            </button>
+        {/* ---------------------------------------------------------- Hero */}
+        <header className="api__hero">
+          <div className="api__hero-signal" aria-hidden="true">
+            <span />
+            <span />
+            <span />
           </div>
-          <p className="api__base-hint">Contoh:</p>
-          <ul className="api__base-examples">
-            {baseUrlExamples.map((path) => (
-              <BaseUrlExample path={path} key={path} />
-            ))}
-          </ul>
-        </div>
+          <h2 id="anime-api-heading" className="api__heading">
+            SenPlay Anime API
+          </h2>
+          <p className="api__description">
+            REST API yang menyuplai data anime SenPlay dari beberapa provider,
+            dimulai dengan Samehadaku dan Otakudesu.
+          </p>
 
-        {endpointGroups.map((group) => (
-          <div className="api__group" key={group.id}>
-            <h3 className="api__group-title">{group.title}</h3>
-            <ul className="api__grid">
-              {group.items.map((item) => (
-                <EndpointCard item={item} key={item.path} />
+          <div className="api__base">
+            <div className="api__base-row">
+              <span className="api__base-label">Base URL</span>
+              <code className="api__base-url">{baseUrl}</code>
+              <button
+                type="button"
+                className="api__copy-base"
+                onClick={() => copyBase(baseUrl)}
+              >
+                {baseCopied ? <CheckIcon /> : <CopyIcon />}
+                <span>{baseCopied ? "Tersalin" : "Salin"}</span>
+              </button>
+            </div>
+            <ul className="api__examples">
+              {baseUrlExamples.map((path) => (
+                <BaseUrlExample path={path} key={path} />
               ))}
             </ul>
           </div>
-        ))}
+        </header>
+
+        {/* ---------------------------------------------------- Rate limit */}
+        <div className="api__warning">
+          <p className="api__warning-title">Peringatan rate limit</p>
+          <div className="api__warning-grid">
+            <p>
+              <strong>30</strong> request / menit
+            </p>
+            <p>
+              <strong>3</strong> peringatan sebelum ban permanen
+            </p>
+          </div>
+          <p className="api__warning-line">
+            Gunakan API dengan bijak — jangan melakukan spamming. Rate limit
+            melindungi server dari serangan DDoS dan aktivitas spammer yang
+            dapat mengganggu layanan untuk pengguna lain.
+          </p>
+          <p className="api__warning-line api__warning-contact">
+            Ingin di-whitelist dari rate limit, atau terkena ban dan butuh unban
+            gratis? Hubungi kami.
+          </p>
+        </div>
+
+        {/* ---------------------------------------------------- Status panel */}
+        <div className="api__status">
+          <div className="api__status-row">
+            <span className="api__status-label">Endpoint stable</span>
+            <div className="api__status-chips">
+              {STABLE_PROVIDER_IDS.map((id) => {
+                const group = endpointGroups.find((g) => g.id === id);
+                if (!group) return null;
+                return (
+                  <span
+                    className={`api__chip${id === RECOMMENDED_PROVIDER_ID ? " api__chip--accent" : ""}`}
+                    key={id}
+                  >
+                    {group.title.replace(/^\S+\s/, "")}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+          <div className="api__status-row api__status-row--highlight">
+            <span className="api__status-label">
+              Sinyal paling stabil &amp; metadata lengkap
+            </span>
+            <span className="api__status-pick">
+              {endpointGroups
+                .find((g) => g.id === RECOMMENDED_PROVIDER_ID)
+                ?.title.replace(/^\S+\s/, "") ?? "Nonton Anime ID"}
+            </span>
+          </div>
+        </div>
+
+        {/* --------------------------------------------------------- Search */}
+        <div className="api__search">
+          <div className="api__search-field">
+            <SearchIcon />
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Cari provider berdasarkan id — mis. otaku, winbu, nekopoi..."
+              aria-label="Cari endpoint API berdasarkan id provider"
+              className="api__search-input"
+            />
+            {query ? (
+              <button
+                type="button"
+                className="api__search-clear"
+                onClick={() => setQuery("")}
+                aria-label="Hapus pencarian"
+              >
+                <ClearIcon />
+              </button>
+            ) : (
+              <kbd className="api__search-kbd">{shortcutLabel}</kbd>
+            )}
+          </div>
+          <p className="api__search-meta">
+            {trimmedQuery
+              ? `${filteredGroups.length} provider · ${resultEndpointCount} endpoint cocok dengan "${trimmedQuery}"`
+              : `${totalProviders} provider · ${totalEndpoints} endpoint total`}
+          </p>
+        </div>
+
+        {/* --------------------------------------------------------- Groups */}
+        {filteredGroups.length > 0 ? (
+          <div className="api__directory">
+            {filteredGroups.map((group) => (
+              <ProviderSection
+                key={group.id}
+                group={group}
+                query={trimmedQuery}
+                forceOpen={Boolean(trimmedQuery)}
+                isOpen={openGroups.has(group.id)}
+                onToggle={toggleGroup}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="api__empty">
+            <p className="api__empty-title">
+              Tidak ada provider dengan id "{trimmedQuery}"
+            </p>
+            <p className="api__empty-hint">
+              Coba kata kunci lain, misalnya sebagian nama provider.
+            </p>
+            <button
+              type="button"
+              className="api__empty-clear"
+              onClick={() => setQuery("")}
+            >
+              Hapus pencarian
+            </button>
+          </div>
+        )}
 
         <p className="api__total">
-          Total {totalEndpoints} endpoint yang sudah kita definisikan, termasuk
+          Total {totalEndpoints} endpoint di {totalProviders} provider, termasuk
           endpoint dokumentasi dan health.
         </p>
       </div>
