@@ -1687,8 +1687,8 @@ export default function AnimeApi() {
             SenPlay Anime API
           </h2>
           <p className="api__description">
-            REST API yang menyuplai data anime SenPlay dari beberapa provider,
-            dimulai dengan Samehadaku dan Otakudesu.
+            REST API yang menyuplai data anime dari beberapa provider, dimulai
+            dengan Samehadaku dan Otakudesu.
           </p>
 
           <div className="api__base">
@@ -1728,10 +1728,20 @@ export default function AnimeApi() {
             melindungi server dari serangan DDoS dan aktivitas spammer yang
             dapat mengganggu layanan untuk pengguna lain.
           </p>
-          <p className="api__warning-line api__warning-contact">
-            Ingin di-whitelist dari rate limit, atau terkena ban dan butuh unban
-            gratis? Hubungi kami.
-          </p>
+          <div className="api__warning-contact">
+            <p className="api__warning-contact-title">
+              Ingin di-whitelist dari rate limit, atau terkena ban dan butuh
+              unban gratis? Hubungi kami.
+            </p>
+            <div className="api__warning-contact-links">
+              className="api__contact-chip" href="https://wa.me/6282260786248"
+              target="_blank" rel="noopener noreferrer"
+              <a>WhatsApp · 0822-6078-6248</a>
+              <span className="api__contact-chip">
+                Discord · senpaii._28 (1215281826092810281)
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* ---------------------------------------------------- Status panel */}

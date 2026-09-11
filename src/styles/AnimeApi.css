@@ -292,7 +292,52 @@
 }
 
 .api__warning-contact {
-  color: var(--color-text-muted);
+  margin-top: 0.875rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--color-danger);
+  background: var(--color-surface);
+}
+
+.api__warning-contact-title {
+  margin: 0 0 0.625rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.api__warning-contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.api__contact-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-danger);
+  background: var(--color-danger-surface);
+  color: var(--color-danger);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: default;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+a.api__contact-chip {
+  cursor: pointer;
+}
+
+a.api__contact-chip:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 /* ------------------------------------------------------------- Status panel */
