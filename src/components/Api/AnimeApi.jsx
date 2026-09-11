@@ -10,6 +10,10 @@ const THEME_STORAGE_KEY = "senplay-api-theme";
 // (isi, urutan, id, title, items — semuanya sama seperti sebelumnya).
 // Semua logic di bawah ini hanya MEMBACA array ini, tidak pernah menulis
 // atau memodifikasinya.
+//
+// Catatan: emoji di awal setiap `title` diganti agar tiap provider punya
+// ikon unik & relevan (bukan lagi pola lingkaran warna berulang). ID, nama
+// provider, endpoint, query, note — semuanya tetap sama persis.
 // ---------------------------------------------------------------------------
 const endpointGroups = [
   {
@@ -172,7 +176,7 @@ const endpointGroups = [
 
   {
     id: "animasu",
-    title: "🟣 Animasu",
+    title: "🎬 Animasu",
     items: [
       {
         method: "GET",
@@ -270,7 +274,7 @@ const endpointGroups = [
 
   {
     id: "kusonime",
-    title: "🟠 Kusonime",
+    title: "🗑️ Kusonime",
     items: [
       {
         method: "GET",
@@ -356,7 +360,7 @@ const endpointGroups = [
   },
   {
     id: "oploverz",
-    title: "🟢 Oploverz",
+    title: "📺 Oploverz",
     items: [
       {
         method: "GET",
@@ -405,7 +409,7 @@ const endpointGroups = [
   },
   {
     id: "anoboy",
-    title: "🔵 AnoBoy",
+    title: "👦 AnoBoy",
     items: [
       {
         method: "GET",
@@ -464,7 +468,7 @@ const endpointGroups = [
   },
   {
     id: "animekuindo",
-    title: "🟡 AnimeKuindo",
+    title: "🇮🇩 AnimeKuindo",
 
     items: [
       {
@@ -576,7 +580,7 @@ const endpointGroups = [
   },
   {
     id: "nimegami",
-    title: "🟣 Nimegami",
+    title: "🎴 Nimegami",
 
     items: [
       {
@@ -708,7 +712,7 @@ const endpointGroups = [
   },
   {
     id: "winbu",
-    title: "🟢 Winbu",
+    title: "🏆 Winbu",
 
     items: [
       {
@@ -823,7 +827,7 @@ const endpointGroups = [
   },
   {
     id: "nontonanimeid",
-    title: "🟢 NontonAnimeID",
+    title: "👁️ NontonAnimeID",
 
     items: [
       {
@@ -909,7 +913,7 @@ const endpointGroups = [
   },
   {
     id: "animeindo",
-    title: "🟢 Animeindo",
+    title: "🏝️ Animeindo",
 
     items: [
       {
@@ -988,7 +992,7 @@ const endpointGroups = [
   },
   {
     id: "animekompi",
-    title: "🟢 AnimeKompi",
+    title: "💻 AnimeKompi",
 
     items: [
       {
@@ -1074,7 +1078,7 @@ const endpointGroups = [
   },
   {
     id: "gomunime",
-    title: "🟢 Gomunime",
+    title: "🎈 Gomunime",
 
     items: [
       {
@@ -1151,7 +1155,7 @@ const endpointGroups = [
   },
   {
     id: "nekopoi",
-    title: "🟢 NekoPoi",
+    title: "🔞 NekoPoi",
 
     items: [
       {
@@ -1422,6 +1426,14 @@ function useCopy() {
   return [copied, copy];
 }
 
+// Memisahkan emoji di awal title dari nama provider, tanpa mengubah
+// string `title` aslinya di dalam endpointGroups.
+function splitTitle(title) {
+  const match = title.match(/^(\S+)\s+(.*)$/);
+  if (!match) return { emoji: "", name: title };
+  return { emoji: match[1], name: match[2] };
+}
+
 // ---------------------------------------------------------------------------
 // Endpoint row (accordion item) — menggantikan grid card lama.
 // ---------------------------------------------------------------------------
@@ -1517,25 +1529,26 @@ function EndpointRow({ item }) {
 }
 
 // ---------------------------------------------------------------------------
-// Provider section (accordion group)
+// Provider section — selalu tampil penuh, tidak ada dropdown/accordion.
+// Setiap provider memakai pola tampilan yang sama persis.
 // ---------------------------------------------------------------------------
 
-function ProviderSection({ group, query, forceOpen, isOpen, onToggle }) {
-  const open = forceOpen || isOpen;
+function ProviderSection({ group, query }) {
   const isStable = STABLE_PROVIDER_IDS.includes(group.id);
   const isRecommended = group.id === RECOMMENDED_PROVIDER_ID;
+  const { emoji, name } = splitTitle(group.title);
 
   return (
     <section
       className={`api__group${isRecommended ? " api__group--recommended" : ""}`}
     >
-      <button
-        type="button"
-        className="api__group-header"
-        onClick={() => onToggle(group.id)}
-        aria-expanded={open}
-      >
-        <span className="api__group-title">{group.title}</span>
+      <div className="api__group-header">
+        <span className="api__group-title">
+          <span className="api__group-emoji" aria-hidden="true">
+            {emoji}
+          </span>
+          {name}
+        </span>
         <span className="api__group-id">
           #{highlightMatch(group.id, query)}
         </span>
@@ -1550,16 +1563,13 @@ function ProviderSection({ group, query, forceOpen, isOpen, onToggle }) {
         )}
 
         <span className="api__group-count">{group.items.length} endpoint</span>
-        <ChevronIcon open={open} />
-      </button>
+      </div>
 
-      {open && (
-        <ul className="api__rows">
-          {group.items.map((item) => (
-            <EndpointRow item={item} key={item.path} />
-          ))}
-        </ul>
-      )}
+      <ul className="api__rows">
+        {group.items.map((item) => (
+          <EndpointRow item={item} key={item.path} />
+        ))}
+      </ul>
     </section>
   );
 }
@@ -1601,7 +1611,6 @@ export default function AnimeApi() {
   });
   const [baseCopied, copyBase] = useCopy();
   const [query, setQuery] = useState("");
-  const [openGroups, setOpenGroups] = useState(() => new Set());
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -1644,15 +1653,6 @@ export default function AnimeApi() {
     () => filteredGroups.reduce((sum, group) => sum + group.items.length, 0),
     [filteredGroups],
   );
-
-  const toggleGroup = (id) => {
-    setOpenGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
   const shortcutLabel = isMac ? "⌘K" : "Ctrl K";
@@ -1806,9 +1806,6 @@ export default function AnimeApi() {
                 key={group.id}
                 group={group}
                 query={trimmedQuery}
-                forceOpen={Boolean(trimmedQuery)}
-                isOpen={openGroups.has(group.id)}
-                onToggle={toggleGroup}
               />
             ))}
           </div>
