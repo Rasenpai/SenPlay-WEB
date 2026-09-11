@@ -1715,28 +1715,39 @@ export default function AnimeApi() {
         {/* ---------------------------------------------------- Rate limit */}
         <div className="api__warning">
           <p className="api__warning-title">Peringatan rate limit</p>
+
           <div className="api__warning-grid">
             <p>
               <strong>30</strong> request / menit
             </p>
+
             <p>
               <strong>3</strong> peringatan sebelum ban permanen
             </p>
           </div>
+
           <p className="api__warning-line">
             Gunakan API dengan bijak — jangan melakukan spamming. Rate limit
             melindungi server dari serangan DDoS dan aktivitas spammer yang
             dapat mengganggu layanan untuk pengguna lain.
           </p>
+
           <div className="api__warning-contact">
             <p className="api__warning-contact-title">
               Ingin di-whitelist dari rate limit, atau terkena ban dan butuh
               unban gratis? Hubungi kami.
             </p>
+
             <div className="api__warning-contact-links">
-              className="api__contact-chip" href="https://wa.me/6282260786248"
-              target="_blank" rel="noopener noreferrer"
-              <a>WhatsApp · 0822-6078-6248</a>
+              <a
+                className="api__contact-chip"
+                href="https://wa.me/6282260786248"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                WhatsApp · 0822-6078-6248
+              </a>
+
               <span className="api__contact-chip">
                 Discord · senpaii._28 (1215281826092810281)
               </span>
