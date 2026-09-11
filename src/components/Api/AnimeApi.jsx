@@ -979,6 +979,92 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "animekompi",
+    title: "🟢 AnimeKompi",
+
+    items: [
+      {
+        method: "GET",
+        path: "/api/animekompi",
+        desc: "Info provider AnimeKompi.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animekompi/anime",
+        query: "?page=1",
+        desc: "Daftar anime AnimeKompi.",
+        note: "Berisi katalog anime AnimeKompi dan mendukung parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animekompi/anime/search",
+        query: "?q=naruto&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
+        note: "Contoh query menggunakan kata kunci naruto.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animekompi/anime/latest",
+        query: "?page=1",
+        desc: "Daftar anime terbaru dari AnimeKompi.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animekompi/anime/popular",
+        query: "?page=1",
+        desc: "Daftar anime populer dari AnimeKompi.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animekompi/anime/:slug",
+        resolvedPath:
+          "/api/animekompi/anime/tensei-shitara-slime-datta-ken-4th-season",
+        desc: "Detail anime AnimeKompi.",
+        note: "Slug sebaiknya diambil dari response endpoint anime, search, latest, atau popular.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animekompi/episode/:slug",
+        resolvedPath:
+          "/api/animekompi/episode/tensei-shitara-slime-datta-ken-4th-season-episode-1-subtitle-indonesia",
+        desc: "Detail episode AnimeKompi.",
+        note: "Gunakan slug episode yang diperoleh dari data episode anime.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animekompi/episode/:slug/stream",
+        resolvedPath:
+          "/api/animekompi/episode/tensei-shitara-slime-datta-ken-4th-season-episode-1-subtitle-indonesia/stream",
+        desc: "Data stream episode AnimeKompi.",
+        note: "Menggunakan slug episode yang sama dengan endpoint detail episode.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animekompi/schedule",
+        desc: "Jadwal rilis anime AnimeKompi.",
+        note: "Mengembalikan jadwal anime berdasarkan hari.",
+      },
+
+      {
+        method: "GET",
+        path: "/api/animekompi/search",
+        query: "?q=naruto&page=1",
+        desc: "Pencarian global AnimeKompi.",
+        note: "Mencari anime berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
