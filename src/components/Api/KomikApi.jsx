@@ -191,6 +191,64 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "natsu",
+    title: "📕 Natsu",
+    items: [
+      {
+        method: "GET",
+        path: "/api/natsu",
+        desc: "Info provider Natsu.",
+      },
+      {
+        method: "GET",
+        path: "/api/natsu/manga",
+        query: "?page=1",
+        desc: "Daftar manga.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/natsu/manga/search",
+        query: "?q=sakamoto&page=1",
+        desc: "Mencari manga berdasarkan kata kunci.",
+      },
+      {
+        method: "GET",
+        path: "/api/natsu/manga/latest",
+        query: "?page=1",
+        desc: "Manga terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/natsu/manga/popular",
+        query: "?page=1",
+        desc: "Manga populer.",
+      },
+      {
+        method: "GET",
+        path: "/api/natsu/manga/:slug",
+        resolvedPath: "/api/natsu/manga/sakamoto-days",
+        desc: "Detail manga.",
+        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: sakamoto-days, one-piece, black-clover, the-beginning-after-the-end.",
+      },
+      {
+        method: "GET",
+        path: "/api/natsu/chapter/:slug",
+        query: "?manga=:mangaSlug",
+        resolvedPath: "/api/natsu/chapter/chapter-1.31984?manga=sakamoto-days",
+        desc: "Detail chapter (reader).",
+        note: "Wajib menyertakan query manga=<slug manga>. Contoh yang sudah PASS: chapter-1.31984, chapter-274.408500, chapter-273.404196, chapter-272.400733 (manga=sakamoto-days). Hasil test chapter-1.31984: totalImages 52, gambar pertama https://cdn.natsu.id/img/S/sakamoto-days/1/1.jpg, gambar terakhir https://cdn.natsu.id/img/S/sakamoto-days/1/52.jpg.",
+      },
+      {
+        method: "GET",
+        path: "/api/natsu/search",
+        query: "?q=sakamoto&page=1",
+        desc: "Pencarian global Natsu.",
+        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
