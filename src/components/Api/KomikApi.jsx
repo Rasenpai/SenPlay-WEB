@@ -134,6 +134,63 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "komikindo",
+    title: "📙 KomikIndo",
+    items: [
+      {
+        method: "GET",
+        path: "/api/komikindo",
+        desc: "Info provider KomikIndo.",
+      },
+      {
+        method: "GET",
+        path: "/api/komikindo/manga",
+        query: "?page=1",
+        desc: "Daftar manga.",
+        note: "Mendukung pagination menggunakan parameter page.",
+      },
+      {
+        method: "GET",
+        path: "/api/komikindo/manga/search",
+        query: "?q=days&page=1",
+        desc: "Mencari manga berdasarkan kata kunci.",
+      },
+      {
+        method: "GET",
+        path: "/api/komikindo/manga/latest",
+        query: "?page=1",
+        desc: "Manga terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/komikindo/manga/popular",
+        query: "?page=1",
+        desc: "Manga populer.",
+      },
+      {
+        method: "GET",
+        path: "/api/komikindo/manga/:slug",
+        resolvedPath: "/api/komikindo/manga/days",
+        desc: "Detail manga.",
+        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: days (76 chapter). Contoh slug lain di KomikIndo: sakamoto-days, watashi-no-oshi-wa-akuyaku-reijou, kimi-to-tsuzuru-utakata, tsue-to-tsurugi-no-wistoria.",
+      },
+      {
+        method: "GET",
+        path: "/api/komikindo/chapter/:slug",
+        resolvedPath: "/api/komikindo/chapter/days-chapter-1",
+        desc: "Detail chapter.",
+        note: "Gunakan slug chapter yang diperoleh dari data chapter manga. Contoh yang sudah diverifikasi: days-chapter-1 (61 gambar), days-chapter-2.",
+      },
+      {
+        method: "GET",
+        path: "/api/komikindo/search",
+        query: "?q=days&page=1",
+        desc: "Pencarian global KomikIndo.",
+        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
@@ -149,7 +206,7 @@ const baseUrlExamples = [
 
 // Dummy — ganti/tambah begitu ada provider komik lain selain Komiku.
 const STABLE_PROVIDER_IDS = ["komiku"];
-const RECOMMENDED_PROVIDER_ID = "komiku";
+const RECOMMENDED_PROVIDER_ID = "KomikIndo";
 
 const isMac =
   typeof navigator !== "undefined" &&
