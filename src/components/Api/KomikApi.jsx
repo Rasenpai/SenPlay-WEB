@@ -248,6 +248,69 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "kiryuu",
+    title: "🐉 Kiryuu",
+    items: [
+      {
+        method: "GET",
+        path: "/api/kiryuu",
+        desc: "Info provider Kiryuu.",
+      },
+      {
+        method: "GET",
+        path: "/api/kiryuu/manga",
+        query: "?page=1",
+        desc: "Daftar manga.",
+      },
+      {
+        method: "GET",
+        path: "/api/kiryuu/manga/search",
+        query: "?q=one+piece&page=1",
+        desc: "Mencari manga berdasarkan kata kunci.",
+        note: "Contoh query menggunakan kata kunci one piece, mengarah ke slug one-piece.",
+      },
+      {
+        method: "GET",
+        path: "/api/kiryuu/manga/latest",
+        query: "?page=1",
+        desc: "Manga terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/kiryuu/manga/popular",
+        query: "?page=1",
+        desc: "Manga populer.",
+      },
+      {
+        method: "GET",
+        path: "/api/kiryuu/manga/popular-today",
+        desc: "Manga populer hari ini.",
+        note: "Sumber slug yang sudah diverifikasi antara lain: one-piece, solo-farming-in-the-tower, magic-emperor, god-of-martial-arts, number-one-star-instructor-master-baek, god-level-assassin, im-really-not-the-demon-gods-lackey, return-of-the-frozen-player, a-beast-hunters-way-of-life, kimi-ni-koisuru-sanshimai, martial-peak, return-of-the-devourer, jungle-juice, nano-machine, my-lucky-encounter-from-the-game-turned-into-reality, sakamoto-days.",
+      },
+      {
+        method: "GET",
+        path: "/api/kiryuu/manga/:slug",
+        resolvedPath: "/api/kiryuu/manga/one-piece",
+        desc: "Detail manga.",
+        note: "Gunakan slug yang diperoleh dari endpoint list/search/popular-today. Contoh yang sudah diverifikasi: one-piece, magic-emperor.",
+      },
+      {
+        method: "GET",
+        path: "/api/kiryuu/chapter/:manga/:slug",
+        resolvedPath: "/api/kiryuu/chapter/one-piece/chapter-100.149301",
+        desc: "Detail chapter.",
+        note: "Path membutuhkan dua parameter: slug manga lalu slug chapter. Slug chapter Kiryuu memakai format nomor+suffix ID (bukan cuma nomor chapter), mis. chapter-100.149301. Contoh lain yang terverifikasi untuk one-piece: chapter-1076.439073, chapter-1053.372756, chapter-814.162950, chapter-249.150867.",
+      },
+      {
+        method: "GET",
+        path: "/api/kiryuu/search",
+        query: "?q=one+piece&page=1",
+        desc: "Pencarian global Kiryuu.",
+        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
