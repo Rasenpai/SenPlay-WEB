@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "../../styles/ToolsApi.css";
 
 const API_BASE = "https://api.senplay.web.id";
@@ -67,6 +67,31 @@ async function readResponseBody(response) {
   } catch {
     return { data: null, pretty: raw };
   }
+}
+
+function formatDuration(seconds) {
+  if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds < 0) {
+    return null;
+  }
+  const total = Math.round(seconds);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function formatBytes(bytes) {
+  if (typeof bytes !== "number" || !Number.isFinite(bytes) || bytes <= 0) {
+    return null;
+  }
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  const rounded = value >= 10 ? Math.round(value) : Math.round(value * 10) / 10;
+  return `${rounded} ${units[unitIndex]}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -163,6 +188,23 @@ function CheckIcon() {
   );
 }
 
+function DownloadIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M12 3a1 1 0 0 1 1 1v9.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V4a1 1 0 0 1 1-1zM5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"
+      />
+    </svg>
+  );
+}
+
 function SpinnerIcon() {
   return (
     <svg
@@ -248,11 +290,39 @@ export default function ToolsApi() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [previewReady, setPreviewReady] = useState(false);
   const [endpointCopied, setEndpointCopied] = useState(false);
   const [resultCopied, setResultCopied] = useState(false);
 
   const requestIdRef = useRef(0);
   const urlInputRef = useRef(null);
+  const resultRef = useRef(null);
+
+  const streamUrl = useMemo(() => {
+    if (!result?.data?.stream) return null;
+    return `${API_BASE}${result.data.stream}`;
+  }, [result]);
+
+  const durationLabel = useMemo(
+    () => formatDuration(result?.data?.duration) ?? "—",
+    [result],
+  );
+  const resolutionLabel = useMemo(() => {
+    const { width, height } = result?.data || {};
+    return width && height ? `${width} × ${height}` : "—";
+  }, [result]);
+  const formatLabel = useMemo(
+    () => (result?.data?.ext ? result.data.ext.toUpperCase() : "MP4"),
+    [result],
+  );
+  const filesizeLabel = useMemo(
+    () => formatBytes(result?.data?.filesize),
+    [result],
+  );
+  const aspectRatio = useMemo(() => {
+    const { width, height } = result?.data || {};
+    return width && height ? `${width} / ${height}` : "9 / 16";
+  }, [result]);
 
   useEffect(() => {
     try {
@@ -270,6 +340,7 @@ export default function ToolsApi() {
     setUrl("");
     setError(null);
     setResult(null);
+    setPreviewReady(false);
     setLoading(false);
     setEndpointCopied(false);
     setResultCopied(false);
@@ -341,6 +412,7 @@ export default function ToolsApi() {
       setLoading(true);
       setError(null);
       setResult(null);
+      setPreviewReady(false);
 
       try {
         const response = await fetch(activeTool.endpoint, {
@@ -379,6 +451,27 @@ export default function ToolsApi() {
     },
     [loading, url, activeTool],
   );
+
+  const handleDownload = useCallback(() => {
+    if (!streamUrl) return;
+    const link = document.createElement("a");
+    link.href = streamUrl;
+    link.download = `senplay-${activeTool?.slug ?? "video"}.mp4`;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }, [streamUrl, activeTool]);
+
+  useEffect(() => {
+    if (result && resultRef.current) {
+      resultRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [result]);
 
   const canSubmit = url.trim().length > 0 && !loading;
 
@@ -545,21 +638,73 @@ export default function ToolsApi() {
             )}
 
             {result && (
-              <div className="tools__json">
-                <div className="tools__json-toolbar">
-                  <span>Response</span>
-                  <button
-                    type="button"
-                    className="tools__copy-btn tools__copy-btn--light"
-                    onClick={handleCopyResult}
-                    aria-label="Salin response"
-                  >
-                    {resultCopied ? <CheckIcon /> : <CopyIcon />}
-                  </button>
+              <div className="tools__result" ref={resultRef}>
+                {streamUrl && (
+                  <div className="tools__preview-card">
+                    <div className="tools__preview" style={{ aspectRatio }}>
+                      {!previewReady && (
+                        <div
+                          className="tools__preview-skeleton"
+                          aria-hidden="true"
+                        />
+                      )}
+                      <video
+                        key={streamUrl}
+                        className="tools__video"
+                        src={streamUrl}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        onLoadedData={() => setPreviewReady(true)}
+                      />
+                    </div>
+
+                    <div className="tools__meta">
+                      <p className="tools__meta-title">
+                        {result.data?.title?.trim() || "TikTok Video"}
+                      </p>
+                      {result.data?.uploader && (
+                        <p className="tools__meta-uploader">
+                          @{result.data.uploader}
+                        </p>
+                      )}
+                      <div className="tools__meta-chips">
+                        <span className="tools__chip">{durationLabel}</span>
+                        <span className="tools__chip">{resolutionLabel}</span>
+                        <span className="tools__chip">{formatLabel}</span>
+                        {filesizeLabel && (
+                          <span className="tools__chip">{filesizeLabel}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="tools__download"
+                      onClick={handleDownload}
+                    >
+                      <DownloadIcon />
+                      <span>Download Video</span>
+                    </button>
+                  </div>
+                )}
+
+                <div className="tools__json">
+                  <div className="tools__json-toolbar">
+                    <span>Response</span>
+                    <button
+                      type="button"
+                      className="tools__copy-btn tools__copy-btn--light"
+                      onClick={handleCopyResult}
+                      aria-label="Salin response"
+                    >
+                      {resultCopied ? <CheckIcon /> : <CopyIcon />}
+                    </button>
+                  </div>
+                  <pre className="tools__json-body">
+                    <code>{result.pretty}</code>
+                  </pre>
                 </div>
-                <pre className="tools__json-body">
-                  <code>{result.pretty}</code>
-                </pre>
               </div>
             )}
           </div>
