@@ -187,15 +187,20 @@ export default function Docs() {
       <div className="docs__container">
         <aside className="docs__sidebar" aria-label="Navigasi dokumentasi">
           <p className="docs__sidebar-title">SENP4II Docs</p>
+
           <nav>
             <ul className="docs__nav">
               {SECTIONS.map((section) => (
                 <li key={section.id}>
-                  href={`#${section.id}`}
-                  className=
-                  {"docs__nav-link" +
-                    (activeId === section.id ? " docs__nav-link--active" : "")}
-                  <a>{section.label}</a>
+                  <a
+                    href={`#${section.id}`}
+                    className={
+                      "docs__nav-link" +
+                      (activeId === section.id ? " docs__nav-link--active" : "")
+                    }
+                  >
+                    {section.label}
+                  </a>
                 </li>
               ))}
             </ul>
