@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import "../../styles/Home.css";
+import "../styles/Home.css";
 
 // ---------------------------------------------------------------------------
 // Waktu -> sapaan. 05:00–10:59 Pagi, 11:00–14:59 Siang, 15:00–17:59 Sore,
