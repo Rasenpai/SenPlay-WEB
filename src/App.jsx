@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Footer from "./components/Footer";
-import TermsOfService from "./components/TermsOfService";
 import AnimeApi from "./components/Api/AnimeApi";
 import SEO from "./components/SEO";
 import {
