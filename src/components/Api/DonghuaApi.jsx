@@ -2,477 +2,176 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "../../styles/Api.css";
 
 const baseUrl = "https://api.senplay.web.id";
-const THEME_STORAGE_KEY = "senplay-komik-api-theme";
+const THEME_STORAGE_KEY = "senplay-donghua-api-theme";
 
 // ---------------------------------------------------------------------------
-// endpointGroups — sumber data Komik API. Silakan tambah provider baru di
+// endpointGroups — sumber data Donghua API. Silakan tambah provider baru di
 // sini kalau sudah ada; logic di bawah hanya MEMBACA array ini.
 // ---------------------------------------------------------------------------
 const endpointGroups = [
   {
-    id: "docs",
-    title: "📚 Dokumentasi API",
+    id: "anichin",
+    title: "🎬 Anichin",
     items: [
       {
         method: "GET",
-        path: "/api",
-        desc: "Dokumentasi utama API.",
+        path: "/api/anichin",
+        desc: "Info provider Anichin.",
       },
       {
         method: "GET",
-        path: "/api/providers",
-        desc: "Daftar semua provider.",
-      },
-    ],
-  },
-
-  {
-    id: "komiku",
-    title: "📖 Komiku",
-    items: [
-      {
-        method: "GET",
-        path: "/api/komiku",
-        desc: "Info provider Komiku.",
-      },
-      {
-        method: "GET",
-        path: "/api/komiku/manga",
+        path: "/api/anichin/manga",
         query: "?page=1",
-        desc: "Daftar manga.",
+        desc: "Daftar semua anime/donghua.",
+        note: "Nama /manga mengikuti struktur route yang dipakai di seluruh API, walaupun Anichin sendiri adalah provider anime/donghua.",
       },
       {
         method: "GET",
-        path: "/api/komiku/manga/search",
-        query: "?q=moimon&page=1",
-        desc: "Mencari manga berdasarkan kata kunci.",
+        path: "/api/anichin/manga/search",
+        query: "?q=soul+land&page=1",
+        desc: "Mencari anime berdasarkan kata kunci.",
       },
       {
         method: "GET",
-        path: "/api/komiku/manga/latest",
+        path: "/api/anichin/manga/latest",
         query: "?page=1",
-        desc: "Manga terbaru.",
+        desc: "Episode terbaru.",
       },
       {
         method: "GET",
-        path: "/api/komiku/manga/:slug",
-        resolvedPath: "/api/komiku/manga/moimon",
-        desc: "Detail manga.",
-        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: moimon.",
-      },
-      {
-        method: "GET",
-        path: "/api/komiku/chapter/:slug",
-        resolvedPath: "/api/komiku/chapter/moimon-chapter-1",
-        desc: "Detail chapter.",
-        note: "Gunakan slug chapter yang diperoleh dari data chapter manga. Contoh yang sudah diverifikasi: moimon-chapter-1.",
-      },
-      {
-        method: "GET",
-        path: "/api/komiku/search",
-        query: "?q=moimon&page=1",
-        desc: "Pencarian global Komiku.",
-        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
-      },
-    ],
-  },
-  {
-    id: "bacakomik",
-    title: "📗 BacaKomik",
-    items: [
-      {
-        method: "GET",
-        path: "/api/bacakomik",
-        desc: "Info provider BacaKomik.",
-      },
-      {
-        method: "GET",
-        path: "/api/bacakomik/manga",
+        path: "/api/anichin/manga/latest-added",
         query: "?page=1",
-        desc: "Daftar manga.",
-        note: "Mendukung pagination menggunakan parameter page.",
+        desc: "Anime yang baru ditambahkan.",
       },
       {
         method: "GET",
-        path: "/api/bacakomik/manga/search",
-        query: "?q=moimon&page=1",
-        desc: "Mencari manga berdasarkan kata kunci.",
-      },
-      {
-        method: "GET",
-        path: "/api/bacakomik/manga/latest",
+        path: "/api/anichin/manga/ongoing",
         query: "?page=1",
-        desc: "Manga terbaru.",
+        desc: "Anime yang sedang tayang.",
       },
       {
         method: "GET",
-        path: "/api/bacakomik/manga/popular",
+        path: "/api/anichin/manga/completed",
         query: "?page=1",
-        desc: "Manga populer.",
-        note: "Mendukung pagination menggunakan parameter page.",
+        desc: "Anime yang sudah tamat.",
       },
       {
         method: "GET",
-        path: "/api/bacakomik/manga/:slug",
-        resolvedPath: "/api/bacakomik/manga/moimon",
-        desc: "Detail manga.",
-        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: moimon.",
-      },
-      {
-        method: "GET",
-        path: "/api/bacakomik/chapter/:slug",
-        resolvedPath: "/api/bacakomik/chapter/moimon-chapter-1",
-        desc: "Detail chapter.",
-        note: "Gunakan slug chapter yang diperoleh dari data chapter manga. Contoh yang sudah diverifikasi: moimon-chapter-1.",
-      },
-      {
-        method: "GET",
-        path: "/api/bacakomik/search",
-        query: "?q=moimon&page=1",
-        desc: "Pencarian global BacaKomik.",
-        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
-      },
-    ],
-  },
-  {
-    id: "komikindo",
-    title: "📙 KomikIndo",
-    items: [
-      {
-        method: "GET",
-        path: "/api/komikindo",
-        desc: "Info provider KomikIndo.",
-      },
-      {
-        method: "GET",
-        path: "/api/komikindo/manga",
+        path: "/api/anichin/manga/upcoming",
         query: "?page=1",
-        desc: "Daftar manga.",
-        note: "Mendukung pagination menggunakan parameter page.",
+        desc: "Anime yang akan datang.",
       },
       {
         method: "GET",
-        path: "/api/komikindo/manga/search",
-        query: "?q=days&page=1",
-        desc: "Mencari manga berdasarkan kata kunci.",
-      },
-      {
-        method: "GET",
-        path: "/api/komikindo/manga/latest",
+        path: "/api/anichin/manga/hiatus",
         query: "?page=1",
-        desc: "Manga terbaru.",
+        desc: "Anime yang sedang hiatus.",
       },
       {
         method: "GET",
-        path: "/api/komikindo/manga/popular",
+        path: "/api/anichin/manga/popular",
+        query: "?period=weekly&page=1",
+        desc: "Anime populer.",
+        note: "Anichin menyediakan kategori Popular Weekly / Monthly / All. Ganti nilai period menjadi weekly, monthly, atau all.",
+      },
+      {
+        method: "GET",
+        path: "/api/anichin/manga/genre/:genre",
         query: "?page=1",
-        desc: "Manga populer.",
+        resolvedPath: "/api/anichin/manga/genre/action",
+        desc: "Anime berdasarkan genre.",
+        note: "Gunakan slug genre yang tersedia di Anichin, mis. action.",
       },
       {
         method: "GET",
-        path: "/api/komikindo/manga/:slug",
-        resolvedPath: "/api/komikindo/manga/229848-solo-leveling",
-        desc: "Detail manga.",
-        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: days (76 chapter). Contoh slug lain di KomikIndo: sakamoto-days, watashi-no-oshi-wa-akuyaku-reijou, kimi-to-tsuzuru-utakata, tsue-to-tsurugi-no-wistoria.",
-      },
-      {
-        method: "GET",
-        path: "/api/komikindo/chapter/:slug",
-        resolvedPath: "/api/komikindo/chapter/days-chapter-1",
-        desc: "Detail chapter.",
-        note: "Gunakan slug chapter yang diperoleh dari data chapter manga. Contoh yang sudah diverifikasi: days-chapter-1 (61 gambar), days-chapter-2.",
-      },
-      {
-        method: "GET",
-        path: "/api/komikindo/search",
-        query: "?q=days&page=1",
-        desc: "Pencarian global KomikIndo.",
-        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
-      },
-    ],
-  },
-  {
-    id: "natsu",
-    title: "📕 Natsu",
-    items: [
-      {
-        method: "GET",
-        path: "/api/natsu",
-        desc: "Info provider Natsu.",
-      },
-      {
-        method: "GET",
-        path: "/api/natsu/manga",
+        path: "/api/anichin/manga/season/:season",
         query: "?page=1",
-        desc: "Daftar manga.",
-        note: "Mendukung pagination menggunakan parameter page.",
+        resolvedPath: "/api/anichin/manga/season/2026",
+        desc: "Anime berdasarkan season.",
+        note: "Gunakan tahun/season yang tersedia di Anichin, mis. 2026.",
       },
       {
         method: "GET",
-        path: "/api/natsu/manga/search",
-        query: "?q=sakamoto&page=1",
-        desc: "Mencari manga berdasarkan kata kunci.",
-      },
-      {
-        method: "GET",
-        path: "/api/natsu/manga/latest",
+        path: "/api/anichin/manga/type/:type",
         query: "?page=1",
-        desc: "Manga terbaru.",
+        resolvedPath: "/api/anichin/manga/type/donghua",
+        desc: "Anime berdasarkan type.",
+        note: "Gunakan slug type yang tersedia di Anichin, mis. donghua.",
       },
       {
         method: "GET",
-        path: "/api/natsu/manga/popular",
+        path: "/api/anichin/manga/status/:status",
         query: "?page=1",
-        desc: "Manga populer.",
+        resolvedPath: "/api/anichin/manga/status/ongoing",
+        desc: "Anime berdasarkan status.",
+        note: "Gunakan slug status yang tersedia di Anichin, mis. ongoing.",
       },
       {
         method: "GET",
-        path: "/api/natsu/manga/:slug",
-        resolvedPath: "/api/natsu/manga/sakamoto-days",
-        desc: "Detail manga.",
-        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: sakamoto-days, one-piece, black-clover, the-beginning-after-the-end.",
-      },
-      {
-        method: "GET",
-        path: "/api/natsu/chapter/:manga/:slug",
-        resolvedPath: "/api/natsu/chapter/sakamoto-days/chapter-1.31984",
-        desc: "Detail chapter (reader).",
-        note: "Manga slug dan chapter slug wajib disertakan. Contoh yang sudah PASS: /api/natsu/chapter/sakamoto-days/chapter-1.31984, /api/natsu/chapter/sakamoto-days/chapter-274.408500, /api/natsu/chapter/sakamoto-days/chapter-273.404196, /api/natsu/chapter/sakamoto-days/chapter-272.400733. Hasil test chapter-1.31984: totalImages 52, gambar pertama https://cdn.natsu.id/img/S/sakamoto-days/1/1.jpg, gambar terakhir https://cdn.natsu.id/img/S/sakamoto-days/1/52.jpg.",
-      },
-      {
-        method: "GET",
-        path: "/api/natsu/search",
-        query: "?q=sakamoto&page=1",
-        desc: "Pencarian global Natsu.",
-        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
-      },
-    ],
-  },
-  {
-    id: "kiryuu",
-    title: "🐉 Kiryuu",
-    items: [
-      {
-        method: "GET",
-        path: "/api/kiryuu",
-        desc: "Info provider Kiryuu.",
-      },
-      {
-        method: "GET",
-        path: "/api/kiryuu/manga",
+        path: "/api/anichin/manga/sub/:sub",
         query: "?page=1",
-        desc: "Daftar manga.",
+        resolvedPath: "/api/anichin/manga/sub/sub",
+        desc: "Anime berdasarkan subtitle.",
+        note: "Gunakan slug subtitle yang tersedia di Anichin, mis. sub.",
       },
       {
         method: "GET",
-        path: "/api/kiryuu/manga/search",
-        query: "?q=one+piece&page=1",
-        desc: "Mencari manga berdasarkan kata kunci.",
-        note: "Contoh query menggunakan kata kunci one piece, mengarah ke slug one-piece.",
-      },
-      {
-        method: "GET",
-        path: "/api/kiryuu/manga/latest",
+        path: "/api/anichin/manga/order/:order",
         query: "?page=1",
-        desc: "Manga terbaru.",
+        resolvedPath: "/api/anichin/manga/order/popular",
+        desc: "Anime berdasarkan urutan.",
+        note: "Gunakan slug order yang tersedia di Anichin, mis. popular.",
       },
       {
         method: "GET",
-        path: "/api/kiryuu/manga/popular",
+        path: "/api/anichin/manga/studio/:studio",
         query: "?page=1",
-        desc: "Manga populer.",
+        resolvedPath: "/api/anichin/manga/studio/cg-year",
+        desc: "Anime berdasarkan studio.",
+        note: "Contoh yang sudah diverifikasi: cg-year.",
       },
       {
         method: "GET",
-        path: "/api/kiryuu/manga/popular-today",
-        desc: "Manga populer hari ini.",
-        note: "Sumber slug yang sudah diverifikasi antara lain: one-piece, solo-farming-in-the-tower, magic-emperor, god-of-martial-arts, number-one-star-instructor-master-baek, god-level-assassin, im-really-not-the-demon-gods-lackey, return-of-the-frozen-player, a-beast-hunters-way-of-life, kimi-ni-koisuru-sanshimai, martial-peak, return-of-the-devourer, jungle-juice, nano-machine, my-lucky-encounter-from-the-game-turned-into-reality, sakamoto-days.",
-      },
-      {
-        method: "GET",
-        path: "/api/kiryuu/manga/:slug",
-        resolvedPath: "/api/kiryuu/manga/one-piece",
-        desc: "Detail manga.",
-        note: "Gunakan slug yang diperoleh dari endpoint list/search/popular-today. Contoh yang sudah diverifikasi: one-piece, magic-emperor.",
-      },
-      {
-        method: "GET",
-        path: "/api/kiryuu/chapter/:manga/:slug",
-        resolvedPath: "/api/kiryuu/chapter/one-piece/chapter-100.149301",
-        desc: "Detail chapter.",
-        note: "Path membutuhkan dua parameter: slug manga lalu slug chapter. Slug chapter Kiryuu memakai format nomor+suffix ID (bukan cuma nomor chapter), mis. chapter-100.149301. Contoh lain yang terverifikasi untuk one-piece: chapter-1076.439073, chapter-1053.372756, chapter-814.162950, chapter-249.150867.",
-      },
-      {
-        method: "GET",
-        path: "/api/kiryuu/search",
-        query: "?q=one+piece&page=1",
-        desc: "Pencarian global Kiryuu.",
-        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
-      },
-    ],
-  },
-  {
-    id: "shinigami",
-    title: "💀 Shinigami",
-    items: [
-      {
-        method: "GET",
-        path: "/api/shinigami",
-        desc: "Info provider Shinigami.",
-      },
-      {
-        method: "GET",
-        path: "/api/shinigami/manga",
+        path: "/api/anichin/manga/az/:letter",
         query: "?page=1",
-        desc: "Semua manga/project.",
+        resolvedPath: "/api/anichin/manga/az/W",
+        desc: "Anime berdasarkan urutan A-Z.",
+        note: "Gunakan huruf A sampai Z, mis. W atau A.",
       },
       {
         method: "GET",
-        path: "/api/shinigami/manga/search",
-        query: "?q=one+piece&page=1",
-        desc: "Mencari manga berdasarkan kata kunci.",
+        path: "/api/anichin/manga/:slug",
+        resolvedPath: "/api/anichin/manga/soul-land-2-the-unrivaled-tang-sect",
+        desc: "Detail anime.",
+        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: soul-land-2-the-unrivaled-tang-sect. Slug lain: battle-through-the-heavens-season-5, renegade-immortal, perfect-world, tales-of-herding-gods, swallowed-star-season-4, throne-of-seal, shrouding-the-heavens, 100000-years-of-refining-qi, a-record-of-a-mortals-journey-to-immortality.",
       },
       {
         method: "GET",
-        path: "/api/shinigami/manga/latest",
-        query: "?page=1",
-        desc: "Manga update terbaru.",
-      },
-      {
-        method: "GET",
-        path: "/api/shinigami/manga/popular",
-        query: "?page=1&filter=all_time",
-        desc: "Manga populer.",
-      },
-      {
-        method: "GET",
-        path: "/api/shinigami/manga/update",
-        query: "?page=1",
-        desc: "Gabungan update Project + Mirror.",
-      },
-      {
-        method: "GET",
-        path: "/api/shinigami/manga/update/project",
-        query: "?page=1",
-        desc: "Update Project.",
-      },
-      {
-        method: "GET",
-        path: "/api/shinigami/manga/update/mirror",
-        query: "?page=1",
-        desc: "Update Mirror.",
-      },
-      {
-        method: "GET",
-        path: "/api/shinigami/manga/:id",
+        path: "/api/anichin/episode/:slug",
         resolvedPath:
-          "/api/shinigami/manga/c0f1d049-ff7f-474d-8c6a-3a55e4c44147",
-        desc: "Detail manga beserta daftar chapter.",
-        note: "Shinigami memakai UUID sebagai id manga, bukan slug. Contoh yang sudah diverifikasi: c0f1d049-ff7f-474d-8c6a-3a55e4c44147 (Demonic Emperor, chapter terbaru 908), 48270276-bd79-4a46-b15e-fdd2cf5655b1 (One Piece, chapter terbaru 1193), 37e72b5f-6a11-4603-9b35-738e4a1d9997 (Lazy Prince Becomes A Genius, chapter terbaru 159), 854d243b-a912-4ce6-9a48-507911b55085 (A Beast Hunter's Way Of Life, chapter terbaru 34).",
+          "/api/anichin/episode/soul-land-2-the-unrivaled-tang-sect-episode-169-subtitle-indonesia",
+        desc: "Detail episode.",
+        note: "Gunakan slug episode yang diperoleh dari data episode anime. Contoh yang sudah diverifikasi: soul-land-2-the-unrivaled-tang-sect-episode-169-subtitle-indonesia.",
       },
       {
         method: "GET",
-        path: "/api/shinigami/chapter/:mangaId/:chapterId",
+        path: "/api/anichin/episode/:manga/:episode",
         resolvedPath:
-          "/api/shinigami/chapter/c0f1d049-ff7f-474d-8c6a-3a55e4c44147/c7805577-bcc6-4af9-b6cf-26f9a8e6d08d",
-        desc: "Baca chapter beserta gambar.",
-        note: "Path membutuhkan dua UUID: id manga lalu id chapter. Contoh yang sudah divalidasi: Demonic Emperor chapter 908 (chapterId c7805577-bcc6-4af9-b6cf-26f9a8e6d08d), totalImages 10.",
+          "/api/anichin/episode/soul-land-2-the-unrivaled-tang-sect/169",
+        desc: "Detail episode (format ringkas).",
+        note: "Path membutuhkan dua parameter: slug anime lalu nomor episode. Endpoint compatibility ini sudah diaudit dan menghasilkan HTTP 200.",
       },
       {
         method: "GET",
-        path: "/api/shinigami/search",
-        query: "?q=one+piece&page=1",
-        desc: "Pencarian global Shinigami.",
-        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
-      },
-    ],
-  },
-  {
-    id: "mwland",
-    title: "🔞 MWLand",
-    items: [
-      {
-        method: "GET",
-        path: "/api/mwland",
-        desc: "Info provider MWLand.",
+        path: "/api/anichin/schedule",
+        desc: "Jadwal rilis episode.",
+        note: "Anichin memiliki halaman schedule tersendiri, dan halaman series-nya menampilkan daftar ongoing series.",
       },
       {
         method: "GET",
-        path: "/api/mwland/manga",
-        query: "?page=1",
-        desc: "Daftar manga.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/manga/search",
-        query: "?q=living+with+my+teacher&page=1",
-        desc: "Mencari manga berdasarkan kata kunci.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/manga/latest",
-        query: "?page=1",
-        desc: "Manga terbaru.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/manga/popular",
-        query: "?page=1",
-        desc: "Manga populer.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/manga/ongoing",
-        query: "?page=1",
-        desc: "Daftar manga yang sedang berjalan.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/manga/completed",
-        query: "?page=1",
-        desc: "Daftar manga yang sudah tamat.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/manga/type/:type",
-        query: "?page=1",
-        desc: "Manga berdasarkan type.",
-        note: "Gunakan slug type yang tersedia di MWLand, mis. manhwa, manhua, atau manga.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/manga/genre/:genre",
-        query: "?page=1",
-        desc: "Manga berdasarkan genre.",
-        note: "Gunakan slug genre yang tersedia di MWLand.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/manga/sort/:sort",
-        query: "?page=1",
-        desc: "Manga berdasarkan urutan sort.",
-        note: "Gunakan slug sort yang tersedia di MWLand, mis. latest, popular, atau title.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/manga/:slug",
-        resolvedPath: "/api/mwland/manga/living-with-my-teacher",
-        desc: "Detail manga.",
-        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: living-with-my-teacher (Living With My Teacher!, tampil di Top Hari Ini dan Rilisan Terbaru homepage ManhwaLand).",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/chapter/:manga/:slug",
-        resolvedPath:
-          "/api/mwland/chapter/living-with-my-teacher/living-with-my-teacher-chapter-7",
-        desc: "Detail chapter.",
-        note: "Path membutuhkan dua parameter: slug manga lalu slug chapter. Contoh yang sudah diverifikasi: manga living-with-my-teacher, chapter living-with-my-teacher-chapter-7.",
-      },
-      {
-        method: "GET",
-        path: "/api/mwland/search",
-        query: "?q=living+with+my+teacher&page=1",
-        desc: "Pencarian global MWLand.",
+        path: "/api/anichin/search",
+        query: "?q=renegade+immortal&page=1",
+        desc: "Pencarian global Anichin.",
         note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
       },
     ],
@@ -486,12 +185,12 @@ const totalEndpoints = endpointGroups.reduce(
 const totalProviders = endpointGroups.length;
 
 const baseUrlExamples = [
-  "/api/komiku/manga?page=1",
-  "/api/komiku/chapter/moimon-chapter-1",
+  "/api/anichin/manga?page=1",
+  "/api/anichin/episode/soul-land-2-the-unrivaled-tang-sect-episode-169-subtitle-indonesia",
 ];
 
-const STABLE_PROVIDER_IDS = ["kiryuu", "bacakomik", "komikindo"];
-const RECOMMENDED_PROVIDER_ID = "shinigami";
+const STABLE_PROVIDER_IDS = ["anichin"];
+const RECOMMENDED_PROVIDER_ID = "anichin";
 
 const isMac =
   typeof navigator !== "undefined" &&
@@ -844,7 +543,7 @@ function BaseUrlExample({ path }) {
 // Main component
 // ---------------------------------------------------------------------------
 
-export default function KomikApi() {
+export default function DonghuaApi() {
   const [theme, setTheme] = useState(() => {
     if (typeof window === "undefined") return "dark";
     try {
@@ -901,10 +600,10 @@ export default function KomikApi() {
 
   return (
     <section
-      id="komik-api"
+      id="donghua-api"
       data-theme={theme}
       className="api"
-      aria-labelledby="komik-api-heading"
+      aria-labelledby="donghua-api-heading"
     >
       <button
         type="button"
@@ -925,12 +624,12 @@ export default function KomikApi() {
             <span />
             <span />
           </div>
-          <h2 id="komik-api-heading" className="api__heading">
-            SENP4II Komik API
+          <h2 id="donghua-api-heading" className="api__heading">
+            SENP4II Donghua API
           </h2>
           <p className="api__description">
-            REST API yang menyuplai data manga/komik dari beberapa provider,
-            dimulai dengan Komiku.
+            REST API yang menyuplai data anime/donghua dari beberapa provider,
+            dimulai dengan Anichin.
           </p>
 
           <div className="api__base">
@@ -1017,7 +716,7 @@ export default function KomikApi() {
             <span className="api__status-pick">
               {endpointGroups
                 .find((g) => g.id === RECOMMENDED_PROVIDER_ID)
-                ?.title.replace(/^\S+\s/, "") ?? "Komiku"}
+                ?.title.replace(/^\S+\s/, "") ?? "Anichin"}
             </span>
           </div>
         </div>
@@ -1031,7 +730,7 @@ export default function KomikApi() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari provider berdasarkan id — mis. komiku..."
+              placeholder="Cari provider berdasarkan id — mis. anichin..."
               aria-label="Cari endpoint API berdasarkan id provider"
               className="api__search-input"
             />

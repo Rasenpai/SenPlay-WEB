@@ -15,6 +15,7 @@ import {
   websiteJsonLd,
 } from "./lib/seo-config";
 import KomikApi from "./components/Api/KomikApi";
+import DonghuaApi from "./components/Api/DonghuaApi";
 
 const NAVBAR_OFFSET_REM = 4;
 
@@ -58,6 +59,10 @@ export default function App() {
 
   if (path === "/komik") {
     return <KomikApi />;
+  }
+
+  if (path === "/donghua") {
+    return <DonghuaApi />;
   }
 
   return (
