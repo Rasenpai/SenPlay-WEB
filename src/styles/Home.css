@@ -438,7 +438,6 @@
   outline-offset: 2px;
 }
 
-
 @media (max-width: 640px) {
   .quote {
     padding: 0 1.25rem 5rem;
@@ -450,5 +449,298 @@
 
   .quote__author {
     text-align: left;
+  }
+}
+
+/* =============================================================
+   Music Player
+   Mini player card: stage (YouTube frame) + control panel.
+   Sama token language dengan .home / .quote di atas.
+   ============================================================= */
+
+.music {
+  --font-mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  --color-bg: #0d1017;
+  --color-surface: #141924;
+  --color-text-primary: #eef0f6;
+  --color-text-secondary: #9aa2b8;
+  --color-text-muted: #69708a;
+  --color-accent: #4fe0c8;
+  --color-violet: #9a8cf9;
+  --color-border: rgba(255, 255, 255, 0.08);
+
+  background: var(--color-bg);
+  padding: 0 1.5rem 6rem;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+.music__card {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.music__header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.music__title {
+  margin: 0 0 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(1.125rem, 2.4vw, 1.375rem);
+  color: var(--color-accent);
+}
+
+.music__subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.music__body {
+  display: flex;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+/* ------------------------------------------------------------- Stage */
+
+.music__stage {
+  position: relative;
+  flex: 0 0 12rem;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: #05070c;
+}
+
+.music__frame {
+  width: 100%;
+  height: 100%;
+}
+
+.music__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: rgba(5, 7, 12, 0.94);
+}
+
+.music__url-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.music__url-label {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.music__url-input {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 0.75rem;
+}
+
+.music__url-input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.music__url-error {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: #f76e6e;
+}
+
+.music__url-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.music__url-submit,
+.music__url-cancel {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.music__url-submit {
+  background: var(--color-accent);
+  color: #05070c;
+}
+
+.music__url-cancel {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+/* ------------------------------------------------------------- Panel */
+
+.music__panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.music__now-playing-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.music__now-playing-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music__status {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.music__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.music__control-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.music__control-btn:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.music__control-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.music__control-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.music__control-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.music__control-btn--primary {
+  width: 2.75rem;
+  height: 2.75rem;
+  background: var(--color-text-primary);
+  color: #05070c;
+  border-color: transparent;
+}
+
+.music__control-btn--primary:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: #05070c;
+}
+
+.music__change-url-btn {
+  margin-top: 0.75rem;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.5rem;
+  border: 1px dashed var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.music__change-url-btn:hover {
+  border-color: var(--color-violet);
+  color: var(--color-violet);
+}
+
+/* ------------------------------------------------------------- Responsive */
+
+@media (max-width: 640px) {
+  .music {
+    padding: 0 1.25rem 5rem;
+  }
+
+  .music__card {
+    padding: 1.25rem;
+  }
+
+  .music__body {
+    flex-direction: column;
+  }
+
+  .music__stage {
+    flex: none;
+    width: 100%;
+  }
+
+  .music__change-url-btn {
+    align-self: stretch;
+    justify-content: center;
   }
 }

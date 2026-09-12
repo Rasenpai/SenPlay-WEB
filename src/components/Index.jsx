@@ -429,6 +429,15 @@ function IconShowcase() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Quotes Of Today — pakai API internal SenPlay. Server yang mengacak
+// kutipan; kita cuma perlu fetch ulang endpoint ini tiap kali halaman
+// dimuat (mount) atau tombol "Kutipan Lain" ditekan.
+//
+// Response yang diharapkan (fleksibel, sesuaikan kalau bentuk aslinya
+// beda): { data: { text | quote | content, author | by | source } }
+// atau langsung { text, author } tanpa pembungkus "data".
+// ---------------------------------------------------------------------------
 const SENPLAY_QUOTES_API_URL = "https://api.senplay.web.id/api/quotes";
 
 function useSenplayQuote(url) {
@@ -546,6 +555,691 @@ function useTypingLoop(texts) {
   }, [displayText, isDeleting, textIndex, texts]);
 
   return displayText;
+}
+
+// =============================================================================
+// Music Player — YouTube IFrame Player API only.
+//
+// Prinsip keamanan/kebijakan yang dijaga di seluruh blok ini:
+// - Tidak pernah download/scrape/proxy audio-video YouTube. Hanya memakai
+//   mekanisme embed resmi (YT.Player) dan endpoint metadata publik oEmbed.
+// - Tidak ada endpoint backend baru (bukan bagian dari SENP4II REST API).
+// - URL yang dimasukkan user divalidasi ketat (host whitelist + pola
+//   VIDEO_ID) sebelum disentuhkan ke player — tidak ada iframe arbitrer.
+// - Tidak ada eval(). Satu-satunya <script> yang dibuat dinamis adalah
+//   loader resmi IFrame API dengan src konstan (bukan dari input user).
+// - Autoplay hanya dipicu oleh interaksi klik user (submit URL, next,
+//   previous, random) — bukan dipaksa saat halaman baru dibuka. Kalau
+//   browser tetap menolak, tombol Play tetap tersedia tanpa error.
+// =============================================================================
+
+// -----------------------------------------------------------------------
+// Ekstraksi VIDEO_ID dari URL YouTube secara aman: pakai URL() bawaan
+// browser (bukan regex terhadap seluruh string), whitelist host, lalu
+// validasi pola ID (selalu 11 karakter alnum/-/_).
+// -----------------------------------------------------------------------
+const YOUTUBE_ALLOWED_HOSTS = new Set(["youtube.com", "youtu.be"]);
+const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
+
+function extractYouTubeVideoId(rawUrl) {
+  if (typeof rawUrl !== "string" || rawUrl.trim() === "") return null;
+
+  let parsed;
+  try {
+    parsed = new URL(rawUrl.trim());
+  } catch {
+    return null;
+  }
+
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    return null;
+  }
+
+  const host = parsed.hostname.replace(/^www\./, "").replace(/^m\./, "");
+  if (!YOUTUBE_ALLOWED_HOSTS.has(host)) return null;
+
+  let candidateId = null;
+
+  if (host === "youtu.be") {
+    candidateId = parsed.pathname.split("/").filter(Boolean)[0] ?? null;
+  } else if (parsed.pathname === "/watch") {
+    candidateId = parsed.searchParams.get("v");
+  } else if (parsed.pathname.startsWith("/shorts/")) {
+    candidateId = parsed.pathname.split("/").filter(Boolean)[1] ?? null;
+  } else if (parsed.pathname.startsWith("/live/")) {
+    candidateId = parsed.pathname.split("/").filter(Boolean)[1] ?? null;
+  }
+
+  if (!candidateId) return null;
+  return YOUTUBE_VIDEO_ID_PATTERN.test(candidateId) ? candidateId : null;
+}
+
+// -----------------------------------------------------------------------
+// Loader resmi YouTube IFrame API. src selalu konstan ke domain YouTube,
+// tidak pernah berasal dari input user — ini mekanisme resmi yang
+// didokumentasikan Google untuk memuat IFrame Player API di browser.
+// -----------------------------------------------------------------------
+const YOUTUBE_IFRAME_API_SRC = "https://www.youtube.com/iframe_api";
+let youtubeApiLoadPromise = null;
+
+function loadYouTubeIframeApi() {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("YouTube API hanya tersedia di browser"));
+  }
+
+  if (window.YT && window.YT.Player) {
+    return Promise.resolve(window.YT);
+  }
+
+  if (youtubeApiLoadPromise) return youtubeApiLoadPromise;
+
+  youtubeApiLoadPromise = new Promise((resolve, reject) => {
+    const previousCallback = window.onYouTubeIframeAPIReady;
+
+    window.onYouTubeIframeAPIReady = () => {
+      previousCallback?.();
+      resolve(window.YT);
+    };
+
+    const alreadyInjected = document.querySelector(
+      `script[src="${YOUTUBE_IFRAME_API_SRC}"]`,
+    );
+    if (alreadyInjected) return;
+
+    const script = document.createElement("script");
+    script.src = YOUTUBE_IFRAME_API_SRC;
+    script.async = true;
+    script.onerror = () => reject(new Error("Gagal memuat YouTube IFrame API"));
+    document.head.appendChild(script);
+  });
+
+  return youtubeApiLoadPromise;
+}
+
+const YOUTUBE_ERROR_MESSAGES = {
+  2: "URL video tidak valid.",
+  5: "Video tidak bisa diputar di pemutar ini.",
+  100: "Video tidak ditemukan atau sudah dihapus.",
+  101: "Pemilik video menonaktifkan pemutaran di situs lain.",
+  150: "Pemilik video menonaktifkan pemutaran di situs lain.",
+};
+
+// -----------------------------------------------------------------------
+// Hook pengelola instance YT.Player. Semua perubahan status (playing,
+// paused, buffering, ended, error, autoplay diblokir) diperbarui lewat
+// callback event resmi YouTube — bukan disetel paksa dari kode kita —
+// supaya effect yang mensinkronkan video hanya memanggil method player
+// (tanpa setState sinkron di badan effect).
+// -----------------------------------------------------------------------
+function useYouTubePlayer(containerRef) {
+  const playerRef = useRef(null);
+  const pendingLoadRef = useRef(null);
+
+  const [isApiReady, setIsApiReady] = useState(false);
+  const [playerState, setPlayerState] = useState("idle");
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [videoTitle, setVideoTitle] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadYouTubeIframeApi()
+      .then(() => {
+        if (!cancelled) setIsApiReady(true);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setErrorMessage("Gagal memuat YouTube Player API.");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isApiReady || !containerRef.current || playerRef.current) {
+      return undefined;
+    }
+
+    const flushPendingLoad = () => {
+      if (!pendingLoadRef.current || !playerRef.current) return;
+      const { videoId, autoplay } = pendingLoadRef.current;
+      pendingLoadRef.current = null;
+      if (autoplay && typeof playerRef.current.loadVideoById === "function") {
+        playerRef.current.loadVideoById(videoId);
+      } else {
+        playerRef.current.cueVideoById(videoId);
+      }
+    };
+
+    playerRef.current = new window.YT.Player(containerRef.current, {
+      height: "100%",
+      width: "100%",
+      playerVars: {
+        rel: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        origin:
+          typeof window !== "undefined" ? window.location.origin : undefined,
+      },
+      events: {
+        onReady: () => {
+          setPlayerState((prev) => (prev === "idle" ? "idle" : prev));
+          flushPendingLoad();
+        },
+        onStateChange: (event) => {
+          const data =
+            typeof playerRef.current?.getVideoData === "function"
+              ? playerRef.current.getVideoData()
+              : null;
+          if (data?.title) setVideoTitle(data.title);
+
+          const YTState = window.YT.PlayerState;
+          switch (event.data) {
+            case YTState.PLAYING:
+              setPlayerState("playing");
+              setErrorMessage(null);
+              break;
+            case YTState.PAUSED:
+              setPlayerState("paused");
+              break;
+            case YTState.BUFFERING:
+              setPlayerState("buffering");
+              break;
+            case YTState.ENDED:
+              setPlayerState("ended");
+              break;
+            case YTState.CUED:
+              setPlayerState("cued");
+              setErrorMessage(null);
+              break;
+            default:
+              break;
+          }
+        },
+        onAutoplayBlocked: () => {
+          // Browser menolak autoplay — biarkan diam di "paused", user
+          // tinggal tekan tombol Play. Bukan error.
+          setPlayerState("paused");
+        },
+        onError: (event) => {
+          setErrorMessage(
+            YOUTUBE_ERROR_MESSAGES[event.data] ?? "Video gagal dimainkan.",
+          );
+          setPlayerState("error");
+        },
+      },
+    });
+
+    return () => {
+      playerRef.current?.destroy?.();
+      playerRef.current = null;
+    };
+  }, [isApiReady, containerRef]);
+
+  // Murni delegasi ke player eksternal — tidak ada setState di sini.
+  // Status ditangkap dari event YouTube sendiri (lihat handler di atas).
+  const loadVideo = useCallback((videoId, { autoplay = false } = {}) => {
+    const player = playerRef.current;
+    if (!player || typeof player.cueVideoById !== "function") {
+      pendingLoadRef.current = { videoId, autoplay };
+      return;
+    }
+    if (autoplay && typeof player.loadVideoById === "function") {
+      player.loadVideoById(videoId);
+    } else {
+      player.cueVideoById(videoId);
+    }
+  }, []);
+
+  const play = useCallback(() => {
+    playerRef.current?.playVideo?.();
+  }, []);
+
+  const pause = useCallback(() => {
+    playerRef.current?.pauseVideo?.();
+  }, []);
+
+  return {
+    isApiReady,
+    playerState,
+    errorMessage,
+    videoTitle,
+    loadVideo,
+    play,
+    pause,
+  };
+}
+
+// -----------------------------------------------------------------------
+// Daftar lagu untuk mode Random — dikonfigurasi di frontend, BUKAN hasil
+// scraping. Lima video lofi/chill dari channel Lofi Girl.
+// -----------------------------------------------------------------------
+const MUSIC_LIBRARY = [
+  {
+    id: "5qap5aO4i9A",
+    title: "Lofi Girl — lofi hip hop radio (beats to relax/study to)",
+  },
+  { id: "CFGLoQIhmow", title: "Lofi Girl — lofi hip hop mix, Pt. 1" },
+  { id: "n61ULEU7CO0", title: "Lofi Girl — Best of lofi hip hop 2021" },
+  { id: "i43tkaTXtwI", title: "Lofi Girl — Best of lofi hip hop 2022" },
+  { id: "mmKguZohAck", title: "Lofi Girl — Best of lofi hip hop 2023" },
+];
+
+function pickRandomTrack(excludeId) {
+  const candidates = MUSIC_LIBRARY.filter((track) => track.id !== excludeId);
+  const pool = candidates.length > 0 ? candidates : MUSIC_LIBRARY;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+const MUSIC_STATUS_LABELS = {
+  idle: "Belum ada video dimuat",
+  cued: "Siap diputar",
+  buffering: "Buffering…",
+  playing: "Sedang diputar",
+  paused: "Dijeda",
+  ended: "Video selesai",
+  error: "Terjadi kesalahan",
+};
+
+function IconMusicNote() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M9 18V5l11-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="17" cy="16" r="3" />
+    </svg>
+  );
+}
+
+function IconSkipBack() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M6 5h2v14H6z" />
+      <path d="M20 5v14l-11-7z" />
+    </svg>
+  );
+}
+
+function IconSkipForward() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M16 5h2v14h-2z" />
+      <path d="M4 5v14l11-7z" />
+    </svg>
+  );
+}
+
+function IconPlay() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M7 4v16l14-8z" />
+    </svg>
+  );
+}
+
+function IconPause() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="6" y="4" width="4" height="16" />
+      <rect x="14" y="4" width="4" height="16" />
+    </svg>
+  );
+}
+
+function IconShuffle() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M3 6h4l10 12h4" />
+      <path d="M17 4l4 3-4 3" />
+      <path d="M3 18h4l3-4.5" />
+      <path d="M13.5 8.5 15 6.5" />
+      <path d="M17 20l4-3-4-3" />
+    </svg>
+  );
+}
+
+function IconLink() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M9 15l6-6" />
+      <path d="M10 6l1-1a4 4 0 0 1 6 6l-1 1" />
+      <path d="M14 18l-1 1a4 4 0 0 1-6-6l1-1" />
+    </svg>
+  );
+}
+
+function MusicPlayerSection() {
+  const playerContainerRef = useRef(null);
+  const {
+    isApiReady,
+    playerState,
+    errorMessage,
+    videoTitle,
+    loadVideo,
+    play,
+    pause,
+  } = useYouTubePlayer(playerContainerRef);
+
+  // { history: [{ id, title, source }], index } — index -1 berarti belum
+  // ada video yang pernah dimuat. Previous/Next menavigasi history ini
+  // seperti riwayat browser; Next di ujung history mengambil lagu acak
+  // baru dari MUSIC_LIBRARY.
+  const [playlistState, setPlaylistState] = useState({
+    history: [],
+    index: -1,
+  });
+  const [showUrlForm, setShowUrlForm] = useState(true);
+  const [urlInput, setUrlInput] = useState("");
+  const [urlError, setUrlError] = useState(null);
+  const [resolvedTitles, setResolvedTitles] = useState({});
+
+  const currentEntry =
+    playlistState.index >= 0
+      ? playlistState.history[playlistState.index]
+      : null;
+
+  // Ambil judul dari endpoint metadata publik YouTube (oEmbed) — bukan
+  // scraping, bukan proxy backend kita, hanya fetch client-side langsung
+  // ke domain youtube.com untuk melengkapi judul video hasil input URL.
+  const fetchOembedTitle = useCallback(async (videoId) => {
+    try {
+      const endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(
+        `https://www.youtube.com/watch?v=${videoId}`,
+      )}&format=json`;
+      const res = await fetch(endpoint);
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json?.title) {
+        setResolvedTitles((prev) => ({ ...prev, [videoId]: json.title }));
+      }
+    } catch {
+      // Diamkan — judul tetap fallback ke metadata player / label generik.
+    }
+  }, []);
+
+  // Sinkronkan video "aktif" (state React) ke player eksternal. Ini
+  // effect yang benar: hanya memanggil method imperatif player, tidak
+  // ada setState di badan effect ini sendiri.
+  useEffect(() => {
+    if (currentEntry) {
+      loadVideo(currentEntry.id, { autoplay: true });
+    }
+  }, [currentEntry, loadVideo]);
+
+  const handleUrlSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
+      const videoId = extractYouTubeVideoId(urlInput);
+      if (!videoId) {
+        setUrlError(
+          "URL tidak valid. Gunakan format youtube.com/watch?v=..., youtu.be/..., atau youtube.com/shorts/...",
+        );
+        return;
+      }
+      setUrlError(null);
+      setPlaylistState((prev) => {
+        const truncated = prev.history.slice(0, prev.index + 1);
+        const nextHistory = [
+          ...truncated,
+          { id: videoId, title: null, source: "custom" },
+        ];
+        return { history: nextHistory, index: nextHistory.length - 1 };
+      });
+      fetchOembedTitle(videoId);
+      setUrlInput("");
+      setShowUrlForm(false);
+    },
+    [urlInput, fetchOembedTitle],
+  );
+
+  const handleRandomClick = useCallback(() => {
+    setPlaylistState((prev) => {
+      const excludeId = prev.index >= 0 ? prev.history[prev.index]?.id : null;
+      const track = pickRandomTrack(excludeId);
+      const truncated = prev.history.slice(0, prev.index + 1);
+      const nextHistory = [
+        ...truncated,
+        { id: track.id, title: track.title, source: "library" },
+      ];
+      return { history: nextHistory, index: nextHistory.length - 1 };
+    });
+    setShowUrlForm(false);
+  }, []);
+
+  const handleNextClick = useCallback(() => {
+    setPlaylistState((prev) => {
+      if (prev.index >= 0 && prev.index < prev.history.length - 1) {
+        return { ...prev, index: prev.index + 1 };
+      }
+      const excludeId = prev.index >= 0 ? prev.history[prev.index]?.id : null;
+      const track = pickRandomTrack(excludeId);
+      const nextHistory = [
+        ...prev.history,
+        { id: track.id, title: track.title, source: "library" },
+      ];
+      return { history: nextHistory, index: nextHistory.length - 1 };
+    });
+    setShowUrlForm(false);
+  }, []);
+
+  const handlePreviousClick = useCallback(() => {
+    setPlaylistState((prev) =>
+      prev.index > 0 ? { ...prev, index: prev.index - 1 } : prev,
+    );
+  }, []);
+
+  const handleTogglePlay = useCallback(() => {
+    if (playerState === "playing") {
+      pause();
+    } else {
+      play();
+    }
+  }, [playerState, play, pause]);
+
+  const handleShowUrlForm = useCallback(() => {
+    setUrlError(null);
+    setUrlInput("");
+    setShowUrlForm(true);
+  }, []);
+
+  const handleCancelUrlForm = useCallback(() => {
+    setUrlError(null);
+    setShowUrlForm(false);
+  }, []);
+
+  const displayedTitle = currentEntry
+    ? (resolvedTitles[currentEntry.id] ??
+      currentEntry.title ??
+      videoTitle ??
+      "Video YouTube")
+    : "Belum ada video";
+
+  const statusText = errorMessage
+    ? errorMessage
+    : !isApiReady
+      ? "Menyiapkan pemutar YouTube…"
+      : (MUSIC_STATUS_LABELS[playerState] ?? "");
+
+  const controlsDisabled = !isApiReady;
+
+  return (
+    <section className="music" aria-labelledby="music-heading">
+      <div className="music__card">
+        <div className="music__header">
+          <h2 id="music-heading" className="music__title">
+            <IconMusicNote />
+            <span>Music Player</span>
+          </h2>
+          <p className="music__subtitle">
+            Diputar langsung lewat embed resmi YouTube — bukan bagian dari
+            SENP4II REST API.
+          </p>
+        </div>
+
+        <div className="music__body">
+          <div className="music__stage">
+            <div ref={playerContainerRef} className="music__frame" />
+
+            {showUrlForm && (
+              <div className="music__overlay">
+                <form className="music__url-form" onSubmit={handleUrlSubmit}>
+                  <label htmlFor="music-url-input" className="music__url-label">
+                    URL YouTube
+                  </label>
+                  <input
+                    id="music-url-input"
+                    type="text"
+                    inputMode="url"
+                    autoComplete="off"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={urlInput}
+                    onChange={(event) => setUrlInput(event.target.value)}
+                    className="music__url-input"
+                  />
+                  {urlError && <p className="music__url-error">{urlError}</p>}
+                  <div className="music__url-actions">
+                    <button type="submit" className="music__url-submit">
+                      Putar
+                    </button>
+                    {currentEntry && (
+                      <button
+                        type="button"
+                        className="music__url-cancel"
+                        onClick={handleCancelUrlForm}
+                      >
+                        Batal
+                      </button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
+
+          <div className="music__panel">
+            <p className="music__now-playing-label">Sedang diputar</p>
+            <p className="music__now-playing-title">{displayedTitle}</p>
+            <p className="music__status">{statusText}</p>
+
+            <div className="music__controls">
+              <button
+                type="button"
+                className="music__control-btn"
+                onClick={handlePreviousClick}
+                disabled={controlsDisabled || playlistState.index <= 0}
+                aria-label="Video sebelumnya"
+              >
+                <IconSkipBack />
+              </button>
+
+              <button
+                type="button"
+                className="music__control-btn music__control-btn--primary"
+                onClick={handleTogglePlay}
+                disabled={
+                  controlsDisabled || !currentEntry || playerState === "error"
+                }
+                aria-label={playerState === "playing" ? "Jeda" : "Putar"}
+              >
+                {playerState === "playing" ? <IconPause /> : <IconPlay />}
+              </button>
+
+              <button
+                type="button"
+                className="music__control-btn"
+                onClick={handleNextClick}
+                disabled={controlsDisabled}
+                aria-label="Video berikutnya"
+              >
+                <IconSkipForward />
+              </button>
+
+              <button
+                type="button"
+                className="music__control-btn"
+                onClick={handleRandomClick}
+                disabled={controlsDisabled}
+                aria-label="Putar acak"
+              >
+                <IconShuffle />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              className="music__change-url-btn"
+              onClick={handleShowUrlForm}
+            >
+              <IconLink />
+              <span>Masukkan URL baru</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default function Index() {
@@ -730,6 +1424,8 @@ export default function Index() {
           </button>
         </div>
       </section>
+
+      <MusicPlayerSection />
     </>
   );
 }
