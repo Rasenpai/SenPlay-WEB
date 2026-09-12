@@ -387,6 +387,96 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "mwland",
+    title: "🔞 MWLand",
+    items: [
+      {
+        method: "GET",
+        path: "/api/mwland",
+        desc: "Info provider MWLand.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga",
+        query: "?page=1",
+        desc: "Daftar manga.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga/search",
+        query: "?q=living+with+my+teacher&page=1",
+        desc: "Mencari manga berdasarkan kata kunci.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga/latest",
+        query: "?page=1",
+        desc: "Manga terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga/popular",
+        query: "?page=1",
+        desc: "Manga populer.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga/ongoing",
+        query: "?page=1",
+        desc: "Daftar manga yang sedang berjalan.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga/completed",
+        query: "?page=1",
+        desc: "Daftar manga yang sudah tamat.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga/type/:type",
+        query: "?page=1",
+        desc: "Manga berdasarkan type.",
+        note: "Gunakan slug type yang tersedia di MWLand, mis. manhwa, manhua, atau manga.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga/genre/:genre",
+        query: "?page=1",
+        desc: "Manga berdasarkan genre.",
+        note: "Gunakan slug genre yang tersedia di MWLand.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga/sort/:sort",
+        query: "?page=1",
+        desc: "Manga berdasarkan urutan sort.",
+        note: "Gunakan slug sort yang tersedia di MWLand, mis. latest, popular, atau title.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/manga/:slug",
+        resolvedPath: "/api/mwland/manga/living-with-my-teacher",
+        desc: "Detail manga.",
+        note: "Gunakan slug yang diperoleh dari endpoint list/search. Contoh yang sudah diverifikasi: living-with-my-teacher (Living With My Teacher!, tampil di Top Hari Ini dan Rilisan Terbaru homepage ManhwaLand).",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/chapter/:manga/:slug",
+        resolvedPath:
+          "/api/mwland/chapter/living-with-my-teacher/living-with-my-teacher-chapter-7",
+        desc: "Detail chapter.",
+        note: "Path membutuhkan dua parameter: slug manga lalu slug chapter. Contoh yang sudah diverifikasi: manga living-with-my-teacher, chapter living-with-my-teacher-chapter-7.",
+      },
+      {
+        method: "GET",
+        path: "/api/mwland/search",
+        query: "?q=living+with+my+teacher&page=1",
+        desc: "Pencarian global MWLand.",
+        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
