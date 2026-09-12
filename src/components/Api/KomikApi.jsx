@@ -311,6 +311,82 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "shinigami",
+    title: "💀 Shinigami",
+    items: [
+      {
+        method: "GET",
+        path: "/api/shinigami",
+        desc: "Info provider Shinigami.",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/manga",
+        query: "?page=1",
+        desc: "Semua manga/project.",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/manga/search",
+        query: "?q=one+piece&page=1",
+        desc: "Mencari manga berdasarkan kata kunci.",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/manga/latest",
+        query: "?page=1",
+        desc: "Manga update terbaru.",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/manga/popular",
+        query: "?page=1&filter=all_time",
+        desc: "Manga populer.",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/manga/update",
+        query: "?page=1",
+        desc: "Gabungan update Project + Mirror.",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/manga/update/project",
+        query: "?page=1",
+        desc: "Update Project.",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/manga/update/mirror",
+        query: "?page=1",
+        desc: "Update Mirror.",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/manga/:id",
+        resolvedPath:
+          "/api/shinigami/manga/c0f1d049-ff7f-474d-8c6a-3a55e4c44147",
+        desc: "Detail manga beserta daftar chapter.",
+        note: "Shinigami memakai UUID sebagai id manga, bukan slug. Contoh yang sudah diverifikasi: c0f1d049-ff7f-474d-8c6a-3a55e4c44147 (Demonic Emperor, chapter terbaru 908), 48270276-bd79-4a46-b15e-fdd2cf5655b1 (One Piece, chapter terbaru 1193), 37e72b5f-6a11-4603-9b35-738e4a1d9997 (Lazy Prince Becomes A Genius, chapter terbaru 159), 854d243b-a912-4ce6-9a48-507911b55085 (A Beast Hunter's Way Of Life, chapter terbaru 34).",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/chapter/:mangaId/:chapterId",
+        resolvedPath:
+          "/api/shinigami/chapter/c0f1d049-ff7f-474d-8c6a-3a55e4c44147/c7805577-bcc6-4af9-b6cf-26f9a8e6d08d",
+        desc: "Baca chapter beserta gambar.",
+        note: "Path membutuhkan dua UUID: id manga lalu id chapter. Contoh yang sudah divalidasi: Demonic Emperor chapter 908 (chapterId c7805577-bcc6-4af9-b6cf-26f9a8e6d08d), totalImages 10.",
+      },
+      {
+        method: "GET",
+        path: "/api/shinigami/search",
+        query: "?q=one+piece&page=1",
+        desc: "Pencarian global Shinigami.",
+        note: "Mencari konten berdasarkan kata kunci dan mendukung pagination.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
@@ -324,8 +400,8 @@ const baseUrlExamples = [
   "/api/komiku/chapter/moimon-chapter-1",
 ];
 
-const STABLE_PROVIDER_IDS = ["komiku", "bacakomik", "komikindo"];
-const RECOMMENDED_PROVIDER_ID = "kiryuu";
+const STABLE_PROVIDER_IDS = ["kiryuu", "bacakomik", "komikindo"];
+const RECOMMENDED_PROVIDER_ID = "shinigami";
 
 const isMac =
   typeof navigator !== "undefined" &&
