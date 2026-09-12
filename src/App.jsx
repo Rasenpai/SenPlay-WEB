@@ -16,7 +16,7 @@ import {
 } from "./lib/seo-config";
 import KomikApi from "./components/Api/KomikApi";
 import DonghuaApi from "./components/Api/DonghuaApi";
-import TiktokDownloaderApi from "./components/Api/TiktokDownloaderApi";
+import TiktokDownloaderApi from "./components/Api/Tools";
 
 const NAVBAR_OFFSET_REM = 4;
 
