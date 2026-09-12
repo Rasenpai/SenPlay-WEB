@@ -164,6 +164,85 @@
   color: var(--color-text-secondary);
 }
 
+/* ------------------------------------------------------------- CTA buttons */
+
+.home__cta {
+  margin-top: 2.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.home__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.125rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.home__cta-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.home__cta-btn:active {
+  transform: translateY(1px);
+}
+
+.home__cta-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.home__cta-btn--soon {
+  cursor: not-allowed;
+  color: var(--color-text-muted);
+  border-style: dashed;
+}
+
+.home__cta-btn--soon:hover {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.home__cta-badge {
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(154, 140, 249, 0.16);
+  color: var(--color-violet);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .home__cta {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home__cta-btn {
+    justify-content: center;
+  }
+}
+
 /* ------------------------------------------------------------- Responsive */
 
 @media (max-width: 640px) {
