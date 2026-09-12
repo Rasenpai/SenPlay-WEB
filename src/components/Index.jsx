@@ -408,6 +408,27 @@ function IconRefresh() {
   );
 }
 
+function IconShowcase() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="17"
+      height="17"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="3" y="4.5" width="18" height="14" rx="1.5" />
+      <path d="M3 8.5h18" />
+      <path d="m8.5 13 2 2 4-4.5" />
+    </svg>
+  );
+}
+
 const SENPLAY_QUOTES_API_URL = "https://api.senplay.web.id/api/quotes";
 
 function useSenplayQuote(url) {
@@ -547,6 +568,11 @@ export default function Index() {
     { label: "SENP4II Anime API", href: "/anime", icon: <IconAnime /> },
     { label: "SENP4II Komik API", href: "/komik", icon: <IconKomik /> },
     { label: "SENP4II Donghua API", href: "/donghua", icon: <IconDonghua /> },
+    {
+      label: "Show Ur Project With SENP4II API",
+      href: "/showcase",
+      icon: <IconShowcase />,
+    },
   ];
 
   const clientInfo = useClientInfo();

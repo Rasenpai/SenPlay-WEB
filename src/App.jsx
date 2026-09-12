@@ -11,6 +11,7 @@ import {
 import KomikApi from "./components/Api/KomikApi";
 import DonghuaApi from "./components/Api/DonghuaApi";
 import Index from "./components/Index";
+import Docs from "./components/Docs";
 
 const NAVBAR_OFFSET_REM = 4;
 
@@ -58,6 +59,10 @@ export default function App() {
 
   if (path === "/donghua") {
     return <DonghuaApi />;
+  }
+
+  if (path === "/documentation") {
+    return <Docs />;
   }
 
   return (
