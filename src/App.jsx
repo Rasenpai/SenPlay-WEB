@@ -1,10 +1,4 @@
 import { useEffect, useState } from "react";
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import MadeForWatching from "./components/MadeForWatching";
-import ContentSection from "./components/ContentSection";
-import DownloadSection from "./components/DownloadSection";
-import FAQ from "./components/FAQ";
 import Footer from "./components/Footer";
 import TermsOfService from "./components/TermsOfService";
 import AnimeApi from "./components/Api/AnimeApi";
@@ -16,7 +10,7 @@ import {
 } from "./lib/seo-config";
 import KomikApi from "./components/Api/KomikApi";
 import DonghuaApi from "./components/Api/DonghuaApi";
-import TiktokDownloaderApi from "./components/Api/Tools";
+import Index from "./components/Index";
 
 const NAVBAR_OFFSET_REM = 4;
 
@@ -66,10 +60,6 @@ export default function App() {
     return <DonghuaApi />;
   }
 
-  if (path === "/tools") {
-    return <TiktokDownloaderApi />;
-  }
-
   return (
     <>
       <SEO
@@ -78,13 +68,8 @@ export default function App() {
         path="/"
         jsonLd={websiteJsonLd}
       />
-      <Navbar />
       <main>
-        <Hero />
-        <MadeForWatching />
-        <ContentSection />
-        <DownloadSection />
-        <FAQ />
+        <Index />
       </main>
       <Footer />
     </>
