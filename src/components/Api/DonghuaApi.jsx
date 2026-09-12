@@ -10,6 +10,22 @@ const THEME_STORAGE_KEY = "senplay-donghua-api-theme";
 // ---------------------------------------------------------------------------
 const endpointGroups = [
   {
+    id: "docs",
+    title: "📚 Dokumentasi API",
+    items: [
+      {
+        method: "GET",
+        path: "/api",
+        desc: "Dokumentasi utama API.",
+      },
+      {
+        method: "GET",
+        path: "/api/providers",
+        desc: "Daftar semua provider.",
+      },
+    ],
+  },
+  {
     id: "anichin",
     title: "🎬 Anichin",
     items: [
@@ -335,6 +351,172 @@ const endpointGroups = [
       },
     ],
   },
+  {
+    id: "animexin",
+    title: "🍥 AnimeXin",
+    items: [
+      {
+        method: "GET",
+        path: "/api/animexin",
+        desc: "Info provider & daftar endpoint.",
+        note: "Endpoint internal API kita, tidak ada slug asli di AnimeXin untuk ini.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime",
+        query: "?page=1",
+        desc: "Daftar semua anime.",
+        note: "Sumber asli AnimeXin: /anime/.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/latest",
+        query: "?page=1",
+        desc: "Anime terbaru.",
+        note: "Sumber asli AnimeXin: /release-date/.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/latest-added",
+        query: "?page=1",
+        desc: "Anime yang baru ditambahkan.",
+        note: "Memakai archive AnimeXin dengan order Latest Added.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/ongoing",
+        query: "?page=1",
+        desc: "Anime yang sedang tayang.",
+        note: "Sumber asli AnimeXin: /anime/ dengan filter status ongoing.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/completed",
+        query: "?page=1",
+        desc: "Anime yang sudah tamat.",
+        note: "Sumber asli AnimeXin: /anime/ dengan filter completed.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/upcoming",
+        query: "?page=1",
+        desc: "Anime yang akan datang.",
+        note: "Sumber asli AnimeXin: /anime/ dengan filter upcoming.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/hiatus",
+        query: "?page=1",
+        desc: "Anime yang sedang hiatus.",
+        note: "Sumber asli AnimeXin: /anime/ dengan filter hiatus.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/popular",
+        query: "?page=1",
+        desc: "Anime populer.",
+        note: "Sumber asli AnimeXin: /anime/ dengan order popular.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/genre/:genre",
+        query: "?page=1",
+        resolvedPath: "/api/animexin/anime/genre/action",
+        desc: "Anime berdasarkan genre.",
+        note: "Slug asli AnimeXin memakai format /genres/{slug}/, mis. /genres/action/. Contoh slug lain: fantasy, adventure, martial-arts, xianxia.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/season/:season",
+        query: "?page=1",
+        resolvedPath: "/api/animexin/anime/season/season-1",
+        desc: "Anime berdasarkan season.",
+        note: "Slug asli AnimeXin memakai format /season/{slug}/, mis. /season/season-1/. Contoh slug lain: season-2, season-3, season-4, season-5, season-10.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/studio/:studio",
+        query: "?page=1",
+        resolvedPath: "/api/animexin/anime/studio/soyep",
+        desc: "Anime berdasarkan studio.",
+        note: "Slug asli AnimeXin memakai format /studio/{slug}/, mis. /studio/soyep/. Contoh studio lain: bilibili.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/status/:status",
+        query: "?page=1",
+        resolvedPath: "/api/animexin/anime/status/ongoing",
+        desc: "Anime berdasarkan status.",
+        note: "Status asli: ongoing, completed, upcoming, hiatus.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/type/:type",
+        query: "?page=1",
+        resolvedPath: "/api/animexin/anime/type/ona",
+        desc: "Anime berdasarkan type.",
+        note: "Nilai yang didukung: tv, ova, movie, live action, special, bd, ona, music.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/sub/:sub",
+        query: "?page=1",
+        resolvedPath: "/api/animexin/anime/sub/sub",
+        desc: "Anime berdasarkan subtitle.",
+        note: "Nilai: sub, dub, raw.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/order/:order",
+        query: "?page=1",
+        resolvedPath: "/api/animexin/anime/order/popular",
+        desc: "Anime berdasarkan urutan.",
+        note: "Nilai yang di-expose: default, az, za, update, new, popular, rating.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/options",
+        desc: "Semua pilihan filter yang tersedia.",
+        note: "Endpoint internal untuk mengambil pilihan filter AnimeXin secara dinamis, mencakup genre, season, studio, status, type, sub, dan order.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/anime/:slug",
+        resolvedPath: "/api/animexin/anime/100-000-years-of-refining-qi",
+        desc: "Detail anime.",
+        note: "Slug API sama persis dengan slug asli AnimeXin (URL asli /:slug/), jadi tidak ada translasi slug. Contoh slug lain: wu-dong-qian-kun, wu-dong-qian-kun-season-2, wu-dong-qian-kun-s3, martial-cultivation-biography, againts-the-sky-supreme (typo slug asli AnimeXin, bukan typo kita), aliens-among-immortals.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/episode/:slug",
+        resolvedPath:
+          "/api/animexin/episode/100-000-years-of-refining-qi-episode-376-indonesia-english-sub",
+        desc: "Detail episode.",
+        note: "Mengembalikan episode number, title, release date, player, metadata, related episode, dan link download. Contoh yang sudah diverifikasi: episode 376, dengan link download Indonesia/English masing-masing Terabox, Mirror, Mediafire kualitas 1080.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/episode/:slug/stream",
+        resolvedPath:
+          "/api/animexin/episode/100-000-years-of-refining-qi-episode-376-indonesia-english-sub/stream",
+        desc: "Info player/embed streaming episode.",
+        note: "Source player AnimeXin adalah Dailymotion, jadi endpoint ini bukan direct MP4/HLS melainkan info player/embed (format https://www.dailymotion.com/embed/video/...).",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/schedule",
+        desc: "Jadwal rilis episode per hari.",
+        note: "Sumber dari schedule homepage AnimeXin, dibagi per hari Monday–Sunday.",
+      },
+      {
+        method: "GET",
+        path: "/api/animexin/search",
+        query: "?q=naruto&page=1",
+        desc: "Pencarian global AnimeXin.",
+        note: "Sumber dari search/archive AnimeXin. Contoh lain: ?q=perfect+world&page=1.",
+      },
+    ],
+  },
 ];
 
 const totalEndpoints = endpointGroups.reduce(
@@ -348,7 +530,7 @@ const baseUrlExamples = [
   "/api/anichin/episode/soul-land-2-the-unrivaled-tang-sect-episode-169-subtitle-indonesia",
 ];
 
-const STABLE_PROVIDER_IDS = ["anichin"];
+const STABLE_PROVIDER_IDS = ["anichin", "donghive", "animexin"];
 const RECOMMENDED_PROVIDER_ID = "anichin";
 
 const isMac =
