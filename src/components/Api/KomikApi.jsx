@@ -325,7 +325,7 @@ const baseUrlExamples = [
 ];
 
 const STABLE_PROVIDER_IDS = ["komiku", "bacakomik", "komikindo"];
-const RECOMMENDED_PROVIDER_ID = "komikindo";
+const RECOMMENDED_PROVIDER_ID = "Kiryuu";
 
 const isMac =
   typeof navigator !== "undefined" &&
