@@ -16,6 +16,7 @@ import {
 } from "./lib/seo-config";
 import KomikApi from "./components/Api/KomikApi";
 import DonghuaApi from "./components/Api/DonghuaApi";
+import TiktokDownloaderApi from "./components/Api/TiktokDownloaderApi";
 
 const NAVBAR_OFFSET_REM = 4;
 
@@ -63,6 +64,10 @@ export default function App() {
 
   if (path === "/donghua") {
     return <DonghuaApi />;
+  }
+
+  if (path === "/tools") {
+    return <TiktokDownloaderApi />;
   }
 
   return (
