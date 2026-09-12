@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "../styles/Home.css";
 
 // ---------------------------------------------------------------------------
@@ -409,64 +409,74 @@ function IconRefresh() {
 }
 
 // ---------------------------------------------------------------------------
-// Quotes Of Today — ambil daftar kutipan sekali dari API, lalu pilih acak
-// di sisi client. Klik "Kutipan Lain" tidak fetch ulang, cukup acak ulang
-// dari daftar yang sudah ada (dan hindari kutipan yang sama persis
-// dua kali berturut-turut).
+// Quotes Of Today — pakai ZenQuotes (satu kutipan acak per request), otomatis
+// generate begitu halaman dimuat. zenquotes.io dikenal tidak selalu
+// mengirim header CORS untuk request langsung dari browser, jadi kalau
+// request langsung gagal, otomatis fallback lewat proxy CORS publik.
+// Ganti CORS_PROXY_URL kalau punya proxy/backend sendiri.
 // ---------------------------------------------------------------------------
-const QUOTES_API_URL =
-  "https://quotes.liupurnomo.com/api/quotes?category=motivasi&page=1&limit=60";
+const ZEN_QUOTES_API_URL = "https://zenquotes.io/api/random";
+const CORS_PROXY_URL = "https://api.allorigins.win/raw?url=";
 
-function pickRandomQuote(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
+function useZenQuote(directUrl, proxyUrl) {
+  const [state, setState] = useState({ status: "loading", quote: null });
+  const controllerRef = useRef(null);
 
-function useQuoteOfToday(url) {
-  const [state, setState] = useState({
-    status: "loading",
-    quotes: [],
-    quote: null,
-  });
+  const load = useCallback(() => {
+    // Batalkan request sebelumnya kalau masih berjalan (mis. user spam klik
+    // tombol "Kutipan Lain").
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
+    setState({ status: "loading", quote: null });
+
+    (async () => {
+      let json;
+
+      try {
+        const res = await fetch(directUrl, { signal: controller.signal });
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        json = await res.json();
+      } catch (directErr) {
+        if (controller.signal.aborted) return;
+        try {
+          const res = await fetch(
+            `${proxyUrl}${encodeURIComponent(directUrl)}`,
+            { signal: controller.signal },
+          );
+          if (!res.ok) throw new Error(`proxy status ${res.status}`);
+          json = await res.json();
+        } catch (proxyErr) {
+          if (controller.signal.aborted) return;
+          console.error(
+            "Gagal memuat quote (langsung & via proxy):",
+            directErr,
+            proxyErr,
+          );
+          setState({ status: "error", quote: null });
+          return;
+        }
+      }
+
+      const first = Array.isArray(json) ? json[0] : null;
+      if (!first?.q) {
+        setState({ status: "error", quote: null });
+        return;
+      }
+      setState({
+        status: "success",
+        quote: { text: first.q, author: first.a || "Anonim" },
+      });
+    })();
+  }, [directUrl, proxyUrl]);
 
   useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
+    load();
+    return () => controllerRef.current?.abort();
+  }, [load]);
 
-    fetch(url, { signal: controller.signal })
-      .then((res) => res.json())
-      .then((json) => {
-        if (cancelled) return;
-        const quotes = Array.isArray(json?.data) ? json.data : [];
-        setState({
-          status: quotes.length ? "success" : "empty",
-          quotes,
-          quote: quotes.length ? pickRandomQuote(quotes) : null,
-        });
-      })
-      .catch((err) => {
-        if (!cancelled && err.name !== "AbortError") {
-          setState({ status: "error", quotes: [], quote: null });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [url]);
-
-  const nextQuote = () => {
-    setState((prev) => {
-      if (prev.quotes.length <= 1) return prev;
-      let candidate = pickRandomQuote(prev.quotes);
-      while (prev.quote && candidate.id === prev.quote.id) {
-        candidate = pickRandomQuote(prev.quotes);
-      }
-      return { ...prev, quote: candidate };
-    });
-  };
-
-  return { ...state, nextQuote };
+  return { ...state, reload: load };
 }
 
 const TYPING_SPEED_MS = 70;
@@ -556,8 +566,8 @@ export default function Index() {
   const {
     status: quoteStatus,
     quote,
-    nextQuote,
-  } = useQuoteOfToday(QUOTES_API_URL);
+    reload: nextQuote,
+  } = useZenQuote(ZEN_QUOTES_API_URL, CORS_PROXY_URL);
 
   const statsData = stats.data;
   const placeholder = "…";
@@ -683,10 +693,6 @@ export default function Index() {
             <p className="quote__status">
               Kutipan tidak tersedia saat ini. Coba lagi nanti.
             </p>
-          )}
-
-          {quoteStatus === "empty" && (
-            <p className="quote__status">Belum ada kutipan untuk saat ini.</p>
           )}
 
           {quoteStatus === "success" && quote && (
