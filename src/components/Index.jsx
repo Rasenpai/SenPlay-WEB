@@ -408,73 +408,62 @@ function IconRefresh() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Quotes Of Today — pakai ZenQuotes (satu kutipan acak per request), otomatis
-// generate begitu halaman dimuat. zenquotes.io dikenal tidak selalu
-// mengirim header CORS untuk request langsung dari browser, jadi kalau
-// request langsung gagal, otomatis fallback lewat proxy CORS publik.
-// Ganti CORS_PROXY_URL kalau punya proxy/backend sendiri.
-// ---------------------------------------------------------------------------
-const ZEN_QUOTES_API_URL = "https://zenquotes.io/api/random";
-const CORS_PROXY_URL = "https://api.allorigins.win/raw?url=";
+const SENPLAY_QUOTES_API_URL = "https://api.senplay.web.id/api/quotes";
 
-function useZenQuote(directUrl, proxyUrl) {
+function useSenplayQuote(url) {
   const [state, setState] = useState({ status: "loading", quote: null });
   const controllerRef = useRef(null);
 
-  const load = useCallback(() => {
-    // Batalkan request sebelumnya kalau masih berjalan (mis. user spam klik
-    // tombol "Kutipan Lain").
-    controllerRef.current?.abort();
-    const controller = new AbortController();
-    controllerRef.current = controller;
-
-    setState({ status: "loading", quote: null });
-
-    (async () => {
-      let json;
-
+  // Bagian async murni: fetch + parse + setState hasil akhir. Tidak ada
+  // setState sinkron sebelum await di sini.
+  const fetchQuote = useCallback(
+    async (signal) => {
       try {
-        const res = await fetch(directUrl, { signal: controller.signal });
+        const res = await fetch(url, { signal });
         if (!res.ok) throw new Error(`status ${res.status}`);
-        json = await res.json();
-      } catch (directErr) {
-        if (controller.signal.aborted) return;
-        try {
-          const res = await fetch(
-            `${proxyUrl}${encodeURIComponent(directUrl)}`,
-            { signal: controller.signal },
-          );
-          if (!res.ok) throw new Error(`proxy status ${res.status}`);
-          json = await res.json();
-        } catch (proxyErr) {
-          if (controller.signal.aborted) return;
-          console.error(
-            "Gagal memuat quote (langsung & via proxy):",
-            directErr,
-            proxyErr,
-          );
+        const json = await res.json();
+        const payload = json?.data ?? json;
+
+        const text =
+          payload?.text ?? payload?.quote ?? payload?.content ?? null;
+        const author =
+          payload?.author ?? payload?.by ?? payload?.source ?? "Anonim";
+
+        if (signal.aborted) return;
+
+        if (!text) {
           setState({ status: "error", quote: null });
           return;
         }
-      }
 
-      const first = Array.isArray(json) ? json[0] : null;
-      if (!first?.q) {
+        setState({ status: "success", quote: { text, author } });
+      } catch (err) {
+        if (signal.aborted) return;
+        console.error("Gagal memuat quote:", err);
         setState({ status: "error", quote: null });
-        return;
       }
-      setState({
-        status: "success",
-        quote: { text: first.q, author: first.a || "Anonim" },
-      });
-    })();
-  }, [directUrl, proxyUrl]);
+    },
+    [url],
+  );
 
+  // Dipakai oleh tombol "Kutipan Lain" (event handler) — boleh setState
+  // sinkron di sini karena tidak dijalankan dari badan effect.
+  const load = useCallback(() => {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setState({ status: "loading", quote: null });
+    fetchQuote(controller.signal);
+  }, [fetchQuote]);
+
+  // Effect mount: langsung subscribe ke hasil fetch, tanpa setState
+  // sinkron duluan. State awal ("loading") sudah benar dari useState.
   useEffect(() => {
-    load();
-    return () => controllerRef.current?.abort();
-  }, [load]);
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    fetchQuote(controller.signal);
+    return () => controller.abort();
+  }, [fetchQuote]);
 
   return { ...state, reload: load };
 }
@@ -567,7 +556,7 @@ export default function Index() {
     status: quoteStatus,
     quote,
     reload: nextQuote,
-  } = useZenQuote(ZEN_QUOTES_API_URL, CORS_PROXY_URL);
+  } = useSenplayQuote(SENPLAY_QUOTES_API_URL);
 
   const statsData = stats.data;
   const placeholder = "…";
