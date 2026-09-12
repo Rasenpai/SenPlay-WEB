@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import "../styles/Home.css";
+import "../../styles/Home.css";
 
 // ---------------------------------------------------------------------------
 // Waktu -> sapaan. 05:00–10:59 Pagi, 11:00–14:59 Siang, 15:00–17:59 Sore,
@@ -387,6 +387,88 @@ function StatCard({ icon, lines }) {
   );
 }
 
+function IconRefresh() {
+  return (
+    <svg
+      className="quote__icon"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M3 12a9 9 0 0 1 15.5-6.2M21 12a9 9 0 0 1-15.5 6.2" />
+      <path d="M17.5 3v4.5H13M6.5 21v-4.5H11" />
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Quotes Of Today — ambil daftar kutipan sekali dari API, lalu pilih acak
+// di sisi client. Klik "Kutipan Lain" tidak fetch ulang, cukup acak ulang
+// dari daftar yang sudah ada (dan hindari kutipan yang sama persis
+// dua kali berturut-turut).
+// ---------------------------------------------------------------------------
+const QUOTES_API_URL =
+  "https://quotes.liupurnomo.com/api/quotes?category=motivasi&page=1&limit=60";
+
+function pickRandomQuote(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function useQuoteOfToday(url) {
+  const [state, setState] = useState({
+    status: "loading",
+    quotes: [],
+    quote: null,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
+    fetch(url, { signal: controller.signal })
+      .then((res) => res.json())
+      .then((json) => {
+        if (cancelled) return;
+        const quotes = Array.isArray(json?.data) ? json.data : [];
+        setState({
+          status: quotes.length ? "success" : "empty",
+          quotes,
+          quote: quotes.length ? pickRandomQuote(quotes) : null,
+        });
+      })
+      .catch((err) => {
+        if (!cancelled && err.name !== "AbortError") {
+          setState({ status: "error", quotes: [], quote: null });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [url]);
+
+  const nextQuote = () => {
+    setState((prev) => {
+      if (prev.quotes.length <= 1) return prev;
+      let candidate = pickRandomQuote(prev.quotes);
+      while (prev.quote && candidate.id === prev.quote.id) {
+        candidate = pickRandomQuote(prev.quotes);
+      }
+      return { ...prev, quote: candidate };
+    });
+  };
+
+  return { ...state, nextQuote };
+}
+
 const TYPING_SPEED_MS = 70;
 const DELETING_SPEED_MS = 35;
 const HOLD_DURATION_MS = 1900;
@@ -471,6 +553,11 @@ export default function Index() {
   const clientInfo = useClientInfo();
   const stats = useServerStats(STATS_API_URL, STATS_REFRESH_MS);
   const now = useClock();
+  const {
+    status: quoteStatus,
+    quote,
+    nextQuote,
+  } = useQuoteOfToday(QUOTES_API_URL);
 
   const statsData = stats.data;
   const placeholder = "…";
@@ -524,61 +611,104 @@ export default function Index() {
   ];
 
   return (
-    <section className="home" aria-labelledby="home-heading">
-      <div className="home__glow" aria-hidden="true" />
+    <>
+      <section className="home" aria-labelledby="home-heading">
+        <div className="home__glow" aria-hidden="true" />
 
-      <div className="home__container">
-        <div className="home__signal" aria-hidden="true">
-          <span />
-          <span />
-          <span />
+        <div className="home__container">
+          <div className="home__signal" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+
+          {/* h1 tersembunyi secara visual untuk SEO/screen reader, karena
+              teks yang terlihat berganti-ganti lewat efek mengetik. */}
+          <h1 id="home-heading" className="home__sr-heading">
+            SENP4II Universe
+          </h1>
+
+          <p className="home__typed" aria-hidden="true">
+            <span className="home__typed-text">{typedText}</span>
+            <span className="home__cursor" />
+          </p>
+
+          <p className="home__tagline">
+            Selamat Datang di SENP4II publik REST API terbaik, dapatkan akses ke
+            API anime, komik, donghua terlengkap, dan nikmati layanan streaming
+            SenPlay.
+          </p>
+
+          <div className="home__cta">
+            {ctaLinks.map((item) => (
+              <a className="home__cta-btn" href={item.href} key={item.href}>
+                {item.icon}
+                <span>{item.label}</span>
+              </a>
+            ))}
+
+            <button
+              type="button"
+              className="home__cta-btn home__cta-btn--soon"
+              disabled
+              aria-disabled="true"
+            >
+              <IconSenPlay />
+              <span>Web SenPlay</span>
+              <span className="home__cta-badge">Soon</span>
+            </button>
+          </div>
         </div>
 
-        {/* h1 tersembunyi secara visual untuk SEO/screen reader, karena
-            teks yang terlihat berganti-ganti lewat efek mengetik. */}
-        <h1 id="home-heading" className="home__sr-heading">
-          SENP4II Universe
-        </h1>
+        <div className="home__stats-wrap">
+          <div className="home__stats-grid">
+            {statCards.map((card, index) => (
+              <StatCard icon={card.icon} lines={card.lines} key={index} />
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <p className="home__typed" aria-hidden="true">
-          <span className="home__typed-text">{typedText}</span>
-          <span className="home__cursor" />
-        </p>
+      <section className="quote" aria-labelledby="quote-heading">
+        <div className="quote__card">
+          <h2 id="quote-heading" className="quote__title">
+            Kata Mutiara Hari Ini
+          </h2>
 
-        <p className="home__tagline">
-          Selamat Datang di SENP4II publik REST API terbaik, dapatkan akses ke
-          API anime, komik, donghua terlengkap, dan nikmati layanan streaming
-          SenPlay.
-        </p>
+          {quoteStatus === "loading" && (
+            <p className="quote__status">Memuat kutipan…</p>
+          )}
 
-        <div className="home__cta">
-          {ctaLinks.map((item) => (
-            <a className="home__cta-btn" href={item.href} key={item.href}>
-              {item.icon}
-              <span>{item.label}</span>
-            </a>
-          ))}
+          {quoteStatus === "error" && (
+            <p className="quote__status">
+              Kutipan tidak tersedia saat ini. Coba lagi nanti.
+            </p>
+          )}
+
+          {quoteStatus === "empty" && (
+            <p className="quote__status">Belum ada kutipan untuk saat ini.</p>
+          )}
+
+          {quoteStatus === "success" && quote && (
+            <>
+              <blockquote className="quote__body">
+                <p className="quote__text">“{quote.text}”</p>
+              </blockquote>
+              <p className="quote__author">~ {quote.author}</p>
+            </>
+          )}
 
           <button
             type="button"
-            className="home__cta-btn home__cta-btn--soon"
-            disabled
-            aria-disabled="true"
+            className="quote__btn"
+            onClick={nextQuote}
+            disabled={quoteStatus !== "success"}
           >
-            <IconSenPlay />
-            <span>Web SenPlay</span>
-            <span className="home__cta-badge">Soon</span>
+            <IconRefresh />
+            <span>Kutipan Lain</span>
           </button>
         </div>
-      </div>
-
-      <div className="home__stats-wrap">
-        <div className="home__stats-grid">
-          {statCards.map((card, index) => (
-            <StatCard icon={card.icon} lines={card.lines} key={index} />
-          ))}
-        </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
