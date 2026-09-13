@@ -1,6 +1,17 @@
 .footer {
+  --font-mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  --color-bg: #0d1017;
+  --color-text-primary: #eef0f6;
+  --color-text-secondary: #9aa2b8;
+  --color-text-muted: #69708a;
+  --color-accent: #4fe0c8;
+  --color-border: rgba(255, 255, 255, 0.08);
+
   background: var(--color-bg);
   padding: 3rem 1.5rem 2rem;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
 }
 
 .footer__container {
@@ -25,8 +36,9 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
   font-size: 0.9375rem;
-  font-weight: 500;
   color: var(--color-text-primary);
 }
 
@@ -51,13 +63,17 @@
 }
 
 .footer__nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.875rem;
   color: var(--color-text-secondary);
+  text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .footer__nav-link:hover {
-  color: var(--color-text-primary);
+  color: var(--color-accent);
 }
 
 .footer__nav-link:focus-visible {
@@ -68,7 +84,7 @@
 
 .footer__divider {
   height: 1px;
-  background: var(--color-border, rgba(255, 255, 255, 0.1));
+  background: var(--color-border);
   margin: 2rem 0 1.5rem;
 }
 
@@ -89,11 +105,18 @@
 .footer__legal-link {
   font-size: 0.8125rem;
   color: var(--color-text-muted);
+  text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .footer__legal-link:hover {
   color: var(--color-text-primary);
+}
+
+.footer__legal-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 0.25rem;
 }
 
 @media (min-width: 640px) {

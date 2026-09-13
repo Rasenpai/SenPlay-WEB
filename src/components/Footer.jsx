@@ -1,33 +1,20 @@
-import "./Footer.css";
+import { Link } from "react-router-dom";
+import "../styles/Footer.css";
+import {
+  ABOUT_ROUTE,
+  API_DOCS_ROUTE,
+  DISCORD_URL,
+  SUPPORT_URL,
+} from "../config/SidebarLinks";
 
-const navLinks = [
-  { label: "Home", href: "#home" },
-  { label: "Explore", href: "#explore" },
-  { label: "Download", href: "#download" },
-  { label: "FAQ", href: "#faq" },
+// Sama seperti daftar menu di Sidebar — internal pakai react-router <Link>,
+// eksternal (Discord, Support) pakai <a> biasa dengan target blank.
+const footerLinks = [
+  { label: "My Profile", href: ABOUT_ROUTE, external: false },
+  { label: "API Docs", href: API_DOCS_ROUTE, external: false },
+  { label: "Discord", href: DISCORD_URL, external: true },
+  { label: "Support SenPlay", href: SUPPORT_URL, external: true },
 ];
-
-const NAVBAR_OFFSET_REM = 4;
-
-function scrollToSection(event, href) {
-  const targetId = href.replace("#", "");
-  const target = document.getElementById(targetId);
-
-  if (target) {
-    event.preventDefault();
-    const navbarOffsetPx =
-      NAVBAR_OFFSET_REM *
-      parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const top =
-      target.getBoundingClientRect().top + window.scrollY - navbarOffsetPx;
-    window.scrollTo({ top, behavior: "smooth" });
-    return;
-  }
-
-  // Section isn't on this page (e.g. viewing /terms) — go back to the homepage section.
-  event.preventDefault();
-  window.location.href = `/${href}`;
-}
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -45,17 +32,21 @@ export default function Footer() {
 
           <nav className="footer__nav" aria-label="Footer navigation">
             <ul className="footer__nav-list">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className="footer__nav-link"
-                    onClick={(e) => scrollToSection(e, link.href)}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
+              {footerLinks.map((link) =>
+                link.external ? (
+                  <li key={link.href}>
+                    <a href={link.href} className="footer__nav-link">
+                      {link.label}
+                    </a>
+                  </li>
+                ) : (
+                  <li key={link.href}>
+                    <Link to={link.href} className="footer__nav-link">
+                      {link.label}
+                    </Link>
+                  </li>
+                ),
+              )}
             </ul>
           </nav>
         </div>
@@ -66,9 +57,9 @@ export default function Footer() {
           <p className="footer__copyright">
             © {year} SenPlay. All rights reserved.
           </p>
-          <a href="/terms" className="footer__legal-link">
+          <Link to="/terms" className="footer__legal-link">
             Terms of Service
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

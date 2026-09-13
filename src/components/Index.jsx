@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import "../styles/Home.css";
 
 // ---------------------------------------------------------------------------
@@ -430,13 +431,12 @@ function IconShowcase() {
 }
 
 // ---------------------------------------------------------------------------
-// Quotes Of Today — pakai API internal SenPlay. Server yang mengacak
-// kutipan; kita cuma perlu fetch ulang endpoint ini tiap kali halaman
-// dimuat (mount) atau tombol "Kutipan Lain" ditekan.
-//
-// Response yang diharapkan (fleksibel, sesuaikan kalau bentuk aslinya
-// beda): { data: { text | quote | content, author | by | source } }
-// atau langsung { text, author } tanpa pembungkus "data".
+// Quotes Of Today — pakai API internal SenPlay. Ditulis dengan .then()/
+// .catch() (BUKAN async/await), meniru pola useServerStats di atas: agar
+// setiap setState benar-benar terjadi di dalam callback function literal
+// yang dilewatkan ke Promise, bukan sebagai "lanjutan" dari fungsi async
+// yang dipanggil langsung dari badan effect — ini akar masalah lint
+// "Avoid calling setState() directly within an effect" sebelumnya.
 // ---------------------------------------------------------------------------
 const SENPLAY_QUOTES_API_URL = "https://api.senplay.web.id/api/quotes";
 
@@ -444,34 +444,35 @@ function useSenplayQuote(url) {
   const [state, setState] = useState({ status: "loading", quote: null });
   const controllerRef = useRef(null);
 
-  // Bagian async murni: fetch + parse + setState hasil akhir. Tidak ada
-  // setState sinkron sebelum await di sini.
+  // Fungsi biasa (bukan async) — badannya hanya memasang rantai
+  // .then()/.catch(). Semua setState ada di dalam callback .then/.catch,
+  // bukan di badan fungsi ini sendiri.
   const fetchQuote = useCallback(
-    async (signal) => {
-      try {
-        const res = await fetch(url, { signal });
-        if (!res.ok) throw new Error(`status ${res.status}`);
-        const json = await res.json();
-        const payload = json?.data ?? json;
+    (signal) => {
+      fetch(url, { signal })
+        .then((res) => {
+          if (!res.ok) throw new Error(`status ${res.status}`);
+          return res.json();
+        })
+        .then((json) => {
+          const payload = json?.data ?? json;
+          const text =
+            payload?.text ?? payload?.quote ?? payload?.content ?? null;
+          const author =
+            payload?.author ?? payload?.by ?? payload?.source ?? "Anonim";
 
-        const text =
-          payload?.text ?? payload?.quote ?? payload?.content ?? null;
-        const author =
-          payload?.author ?? payload?.by ?? payload?.source ?? "Anonim";
+          if (!text) {
+            setState({ status: "error", quote: null });
+            return;
+          }
 
-        if (signal.aborted) return;
-
-        if (!text) {
+          setState({ status: "success", quote: { text, author } });
+        })
+        .catch((err) => {
+          if (err.name === "AbortError") return;
+          console.error("Gagal memuat quote:", err);
           setState({ status: "error", quote: null });
-          return;
-        }
-
-        setState({ status: "success", quote: { text, author } });
-      } catch (err) {
-        if (signal.aborted) return;
-        console.error("Gagal memuat quote:", err);
-        setState({ status: "error", quote: null });
-      }
+        });
     },
     [url],
   );
@@ -486,8 +487,9 @@ function useSenplayQuote(url) {
     fetchQuote(controller.signal);
   }, [fetchQuote]);
 
-  // Effect mount: langsung subscribe ke hasil fetch, tanpa setState
-  // sinkron duluan. State awal ("loading") sudah benar dari useState.
+  // Effect mount: hanya memanggil fetchQuote (fungsi tanpa setState
+  // sinkron di badannya) — state awal ("loading") sudah benar dari
+  // useState, jadi effect ini murni "berlangganan" hasil fetch.
   useEffect(() => {
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -557,27 +559,6 @@ function useTypingLoop(texts) {
   return displayText;
 }
 
-// =============================================================================
-// Music Player — YouTube IFrame Player API only.
-//
-// Prinsip keamanan/kebijakan yang dijaga di seluruh blok ini:
-// - Tidak pernah download/scrape/proxy audio-video YouTube. Hanya memakai
-//   mekanisme embed resmi (YT.Player) dan endpoint metadata publik oEmbed.
-// - Tidak ada endpoint backend baru (bukan bagian dari SENP4II REST API).
-// - URL yang dimasukkan user divalidasi ketat (host whitelist + pola
-//   VIDEO_ID) sebelum disentuhkan ke player — tidak ada iframe arbitrer.
-// - Tidak ada eval(). Satu-satunya <script> yang dibuat dinamis adalah
-//   loader resmi IFrame API dengan src konstan (bukan dari input user).
-// - Autoplay hanya dipicu oleh interaksi klik user (submit URL, next,
-//   previous, random) — bukan dipaksa saat halaman baru dibuka. Kalau
-//   browser tetap menolak, tombol Play tetap tersedia tanpa error.
-// =============================================================================
-
-// -----------------------------------------------------------------------
-// Ekstraksi VIDEO_ID dari URL YouTube secara aman: pakai URL() bawaan
-// browser (bukan regex terhadap seluruh string), whitelist host, lalu
-// validasi pola ID (selalu 11 karakter alnum/-/_).
-// -----------------------------------------------------------------------
 const YOUTUBE_ALLOWED_HOSTS = new Set(["youtube.com", "youtu.be"]);
 const YOUTUBE_VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 
@@ -1133,8 +1114,7 @@ function MusicPlayerSection() {
             <span>Music Player</span>
           </h2>
           <p className="music__subtitle">
-            Diputar langsung lewat embed resmi YouTube — bukan bagian dari
-            SENP4II REST API.
+            Diputar langsung lewat embed resmi YouTube
           </p>
         </div>
 
@@ -1256,14 +1236,14 @@ export default function Index() {
 
   const typedText = useTypingLoop(rotatingTexts);
 
-  // Ganti <a href> di bawah dengan <Link> dari router project Anda
-  // (mis. react-router-dom) kalau ingin navigasi tanpa full page reload.
+  // Route internal — dirender lewat <Link> react-router-dom (lihat CTA di
+  // bawah), bukan lagi <a href> biasa, supaya navigasi tanpa full reload.
   const ctaLinks = [
     { label: "SENP4II Anime API", href: "/anime", icon: <IconAnime /> },
     { label: "SENP4II Komik API", href: "/komik", icon: <IconKomik /> },
     { label: "SENP4II Donghua API", href: "/donghua", icon: <IconDonghua /> },
     {
-      label: "Show Ur Project With SENP4II API",
+      label: "Showcase",
       href: "/showcase",
       icon: <IconShowcase />,
     },
@@ -1360,22 +1340,21 @@ export default function Index() {
 
           <div className="home__cta">
             {ctaLinks.map((item) => (
-              <a className="home__cta-btn" href={item.href} key={item.href}>
+              <Link className="home__cta-btn" to={item.href} key={item.href}>
                 {item.icon}
                 <span>{item.label}</span>
-              </a>
+              </Link>
             ))}
 
-            <button
-              type="button"
-              className="home__cta-btn home__cta-btn--soon"
-              disabled
-              aria-disabled="true"
+            <a
+              href="https://link.senplay.web.id"
+              className="home__cta-btn"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <IconSenPlay />
               <span>Web SenPlay</span>
-              <span className="home__cta-badge">Soon</span>
-            </button>
+            </a>
           </div>
         </div>
 
